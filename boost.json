@@ -1,0 +1,10 @@
+{
+    "agents": [
+        "opencode"
+    ],
+    "editors": [
+        "opencode"
+    ],
+    "guidelines": [],
+    "herd_mcp": true
+}
