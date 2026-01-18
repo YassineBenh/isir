@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\DiscordWebhookUrl;
+use App\Rules\SlackWebhookUrl;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -38,13 +40,20 @@ class StoreDestinationRequest extends FormRequest
             'webhook_url' => [
                 Rule::requiredIf(fn () => in_array($this->input('type'), ['slack', 'discord'])),
                 'nullable',
-                'url:https',
                 'max:2048',
+                Rule::when(
+                    $this->input('type') === 'slack',
+                    [new SlackWebhookUrl]
+                ),
+                Rule::when(
+                    $this->input('type') === 'discord',
+                    [new DiscordWebhookUrl]
+                ),
             ],
             'email' => [
                 Rule::requiredIf(fn () => $this->input('type') === 'email'),
                 'nullable',
-                'email',
+                'email:rfc',
                 'max:255',
             ],
         ];
@@ -59,8 +68,8 @@ class StoreDestinationRequest extends FormRequest
     {
         return [
             'webhook_url.required_if' => 'The webhook URL is required for Slack and Discord destinations.',
-            'webhook_url.url' => 'The webhook URL must be a valid HTTPS URL.',
             'email.required_if' => 'The email address is required for email destinations.',
+            'email.email' => 'The email address must be a valid email address.',
         ];
     }
 

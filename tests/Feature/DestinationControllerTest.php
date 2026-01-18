@@ -101,7 +101,7 @@ describe('store', function () {
     it('validates type is required', function () {
         $response = $this->actingAs($this->user)->post('/destinations', [
             'name' => 'Test',
-            'webhook_url' => 'https://hooks.slack.com/services/xxx',
+            'webhook_url' => 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
         ]);
 
         $response->assertSessionHasErrors('type');
@@ -111,7 +111,7 @@ describe('store', function () {
         $response = $this->actingAs($this->user)->post('/destinations', [
             'type' => 'invalid',
             'name' => 'Test',
-            'webhook_url' => 'https://hooks.slack.com/services/xxx',
+            'webhook_url' => 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
         ]);
 
         $response->assertSessionHasErrors('type');
@@ -144,14 +144,54 @@ describe('store', function () {
         $response->assertSessionHasErrors('email');
     });
 
-    it('validates webhook_url must be https', function () {
+    it('validates slack webhook url format', function () {
         $response = $this->actingAs($this->user)->post('/destinations', [
             'type' => 'slack',
             'name' => '#releases',
-            'webhook_url' => 'http://hooks.slack.com/services/xxx',
+            'webhook_url' => 'https://example.com/invalid',
         ]);
 
         $response->assertSessionHasErrors('webhook_url');
+    });
+
+    it('validates discord webhook url format', function () {
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'discord',
+            'name' => '#updates',
+            'webhook_url' => 'https://example.com/invalid',
+        ]);
+
+        $response->assertSessionHasErrors('webhook_url');
+    });
+
+    it('rejects slack webhook url for discord type', function () {
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'discord',
+            'name' => '#updates',
+            'webhook_url' => 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+        ]);
+
+        $response->assertSessionHasErrors('webhook_url');
+    });
+
+    it('rejects discord webhook url for slack type', function () {
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'slack',
+            'name' => '#releases',
+            'webhook_url' => 'https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyz',
+        ]);
+
+        $response->assertSessionHasErrors('webhook_url');
+    });
+
+    it('validates email format', function () {
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'email',
+            'name' => 'Personal',
+            'email' => 'not-an-email',
+        ]);
+
+        $response->assertSessionHasErrors('email');
     });
 
     it('enforces maximum destinations limit', function () {
@@ -198,14 +238,14 @@ describe('update', function () {
         $response = $this->actingAs($this->user)->put("/destinations/{$destination->id}", [
             'type' => 'slack',
             'name' => 'Updated Name',
-            'webhook_url' => 'https://hooks.slack.com/services/NEW/WEBHOOK/URL',
+            'webhook_url' => 'https://hooks.slack.com/services/TNEWTEAM/BNEWBOT/NewWebhookToken123',
         ]);
 
         $response->assertRedirect('/destinations');
 
         $destination->refresh();
         expect($destination->name)->toBe('Updated Name');
-        expect($destination->config['webhook_url'])->toBe('https://hooks.slack.com/services/NEW/WEBHOOK/URL');
+        expect($destination->config['webhook_url'])->toBe('https://hooks.slack.com/services/TNEWTEAM/BNEWBOT/NewWebhookToken123');
     });
 
     it('prevents updating another users destination', function () {
@@ -214,7 +254,7 @@ describe('update', function () {
         $response = $this->actingAs($this->user)->put("/destinations/{$otherDestination->id}", [
             'type' => 'slack',
             'name' => 'Hacked',
-            'webhook_url' => 'https://hooks.slack.com/services/xxx',
+            'webhook_url' => 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
         ]);
 
         $response->assertForbidden();
