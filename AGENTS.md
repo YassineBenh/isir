@@ -1,4 +1,73 @@
 <laravel-boost-guidelines>
+=== .ai/action rules ===
+
+# Action Pattern Guidelines
+
+## Overview
+
+Use the **Action pattern** for all business logic. Actions are single-purpose, invokable classes that encapsulate one specific task.
+
+## When to Use Actions
+
+- Any business logic beyond simple CRUD
+- Operations that could be reused across controllers, commands, jobs, or tests
+- Complex workflows that benefit from clear naming and isolation
+
+## Structure
+
+```php
+namespace App\Actions;
+
+class CreateSubscription
+{
+    public function __construct(
+        private StripeService $stripe,
+        private NotificationService $notifications,
+    ) {}
+
+    public function __invoke(User $user, Plan $plan): Subscription
+    {
+        // Single responsibility: create a subscription
+    }
+}
+```
+
+## Rules
+
+1. **One action, one task** - Name should describe exactly what it does
+2. **Use `__invoke()`** - Makes the class callable: `app(CreateSubscription::class)($user, $plan)`
+3. **Inject dependencies** - Use constructor injection for services
+4. **Return meaningful values** - Return the result, not void when possible
+5. **Keep controllers thin** - Controllers should delegate to actions immediately
+
+## Naming Convention
+
+- Use verb + noun: `CreateUser`, `SendInvoice`, `CalculateDiscount`
+- Place in `app/Actions/` or `app/Actions/{Domain}/`
+
+## Usage
+
+```php
+// In controller
+public function store(Request $request, CreateSubscription $action)
+{
+    $subscription = $action($request->user(), $plan);
+
+    return redirect()->route('subscriptions.show', $subscription);
+}
+
+// In test
+$action = app(CreateSubscription::class);
+$subscription = $action($user, $plan);
+```
+
+## Benefits
+
+- Testable in isolation
+- Reusable across the application
+- Self-documenting through naming
+- Easy to locate business logic
+
 === foundation rules ===
 
 # Laravel Boost Guidelines
@@ -19,6 +88,12 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/sail (SAIL) - v1
 - pestphp/pest (PEST) - v4
 - phpunit/phpunit (PHPUNIT) - v12
+- @inertiajs/react (INERTIA) - v2
+- react (REACT) - v19
+- tailwindcss (TAILWINDCSS) - v4
+- @laravel/vite-plugin-wayfinder (WAYFINDER) - v0
+- eslint (ESLINT) - v9
+- prettier (PRETTIER) - v3
 
 ## Conventions
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
@@ -149,7 +224,9 @@ Route::get('/users', function () {
 - When using deferred props on the frontend, you should add a nice empty state with pulsing/animated skeleton.
 
 ### Inertia Form General Guidance
-- Build forms using the `useForm` helper. Use the code examples and the `search-docs` tool with a query of `useForm helper` for guidance.
+- The recommended way to build forms when using Inertia is with the `<Form>` component - a useful example is below. Use the `search-docs` tool with a query of `form component` for guidance.
+- Forms can also be built using the `useForm` helper for more programmatic control, or to follow existing conventions. Use the `search-docs` tool with a query of `useForm helper` for guidance.
+- `resetOnError`, `resetOnSuccess`, and `setDefaultsOnSuccess` are available on the `<Form>` component. Use the `search-docs` tool with a query of `form component resetting` for guidance.
 
 === laravel/core rules ===
 
@@ -263,16 +340,11 @@ Wayfinder generates TypeScript functions and types for Laravel controllers and r
 </code-snippet>
 
 ### Wayfinder + Inertia
-If your application uses the `useForm` component from Inertia, you can directly submit to the Wayfinder generated functions.
+If your application uses the `<Form>` component from Inertia, you can use Wayfinder to generate form action and method automatically.
+<code-snippet name="Wayfinder Form Component (React)" lang="typescript">
 
-<code-snippet name="Wayfinder useForm Example" lang="typescript">
-    import { store } from "@/actions/App/Http/Controllers/ExampleController";
+<Form {...store.form()}><input name="title" /></Form>
 
-    const form = useForm({
-        name: "My Big Post",
-    });
-
-    form.submit(store());
 </code-snippet>
 
 === pint/core rules ===
@@ -377,4 +449,146 @@ $pages = visit(['/', '/about', '/contact']);
 
 $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
 </code-snippet>
+
+=== inertia-react/core rules ===
+
+## Inertia + React
+
+- Use `router.visit()` or `<Link>` for navigation instead of traditional links.
+
+<code-snippet name="Inertia Client Navigation" lang="react">
+
+import { Link } from '@inertiajs/react'
+<Link href="/">Home</Link>
+
+</code-snippet>
+
+=== inertia-react/v2/forms rules ===
+
+## Inertia v2 + React Forms
+
+<code-snippet name="`<Form>` Component Example" lang="react">
+
+import { Form } from '@inertiajs/react'
+
+export default () => (
+    <Form action="/users" method="post">
+        {({
+            errors,
+            hasErrors,
+            processing,
+            wasSuccessful,
+            recentlySuccessful,
+            clearErrors,
+            resetAndClearErrors,
+            defaults
+        }) => (
+        <>
+        <input type="text" name="name" />
+
+        {errors.name && <div>{errors.name}</div>}
+
+        <button type="submit" disabled={processing}>
+            {processing ? 'Creating...' : 'Create User'}
+        </button>
+
+        {wasSuccessful && <div>User created successfully!</div>}
+        </>
+    )}
+    </Form>
+)
+
+</code-snippet>
+
+=== tailwindcss/core rules ===
+
+## Tailwind CSS
+
+- Use Tailwind CSS classes to style HTML; check and use existing Tailwind conventions within the project before writing your own.
+- Offer to extract repeated patterns into components that match the project's conventions (i.e. Blade, JSX, Vue, etc.).
+- Think through class placement, order, priority, and defaults. Remove redundant classes, add classes to parent or child carefully to limit repetition, and group elements logically.
+- You can use the `search-docs` tool to get exact examples from the official documentation when needed.
+
+### Spacing
+- When listing items, use gap utilities for spacing; don't use margins.
+
+<code-snippet name="Valid Flex Gap Spacing Example" lang="html">
+    <div class="flex gap-8">
+        <div>Superior</div>
+        <div>Michigan</div>
+        <div>Erie</div>
+    </div>
+</code-snippet>
+
+### Dark Mode
+- If existing pages and components support dark mode, new pages and components must support dark mode in a similar way, typically using `dark:`.
+
+=== tailwindcss/v4 rules ===
+
+## Tailwind CSS 4
+
+- Always use Tailwind CSS v4; do not use the deprecated utilities.
+- `corePlugins` is not supported in Tailwind v4.
+- In Tailwind v4, configuration is CSS-first using the `@theme` directive — no separate `tailwind.config.js` file is needed.
+
+<code-snippet name="Extending Theme in CSS" lang="css">
+@theme {
+  --color-brand: oklch(0.72 0.11 178);
+}
+</code-snippet>
+
+- In Tailwind v4, you import Tailwind using a regular CSS `@import` statement, not using the `@tailwind` directives used in v3:
+
+<code-snippet name="Tailwind v4 Import Tailwind Diff" lang="diff">
+   - @tailwind base;
+   - @tailwind components;
+   - @tailwind utilities;
+   + @import "tailwindcss";
+</code-snippet>
+
+### Replaced Utilities
+- Tailwind v4 removed deprecated utilities. Do not use the deprecated option; use the replacement.
+- Opacity values are still numeric.
+
+| Deprecated |	Replacement |
+|------------+--------------|
+| bg-opacity-* | bg-black/* |
+| text-opacity-* | text-black/* |
+| border-opacity-* | border-black/* |
+| divide-opacity-* | divide-black/* |
+| ring-opacity-* | ring-black/* |
+| placeholder-opacity-* | placeholder-black/* |
+| flex-shrink-* | shrink-* |
+| flex-grow-* | grow-* |
+| overflow-ellipsis | text-ellipsis |
+| decoration-slice | box-decoration-slice |
+| decoration-clone | box-decoration-clone |
+
+=== laravel/fortify rules ===
+
+## Laravel Fortify
+
+Fortify is a headless authentication backend that provides authentication routes and controllers for Laravel applications.
+
+**Before implementing any authentication features, use the `search-docs` tool to get the latest docs for that specific feature.**
+
+### Configuration & Setup
+- Check `config/fortify.php` to see what's enabled. Use `search-docs` for detailed information on specific features.
+- Enable features by adding them to the `'features' => []` array: `Features::registration()`, `Features::resetPasswords()`, etc.
+- To see the all Fortify registered routes, use the `list-routes` tool with the `only_vendor: true` and `action: "Fortify"` parameters.
+- Fortify includes view routes by default (login, register). Set `'views' => false` in the configuration file to disable them if you're handling views yourself.
+
+### Customization
+- Views can be customized in `FortifyServiceProvider`'s `boot()` method using `Fortify::loginView()`, `Fortify::registerView()`, etc.
+- Customize authentication logic with `Fortify::authenticateUsing()` for custom user retrieval / validation.
+- Actions in `app/Actions/Fortify/` handle business logic (user creation, password reset, etc.). They're fully customizable, so you can modify them to change feature behavior.
+
+## Available Features
+- `Features::registration()` for user registration.
+- `Features::emailVerification()` to verify new user emails.
+- `Features::twoFactorAuthentication()` for 2FA with QR codes and recovery codes.
+  - Add options: `['confirmPassword' => true, 'confirm' => true]` to require password confirmation and OTP confirmation before enabling 2FA.
+- `Features::updateProfileInformation()` to let users update their profile.
+- `Features::updatePasswords()` to let users change their passwords.
+- `Features::resetPasswords()` for password reset via email.
 </laravel-boost-guidelines>
