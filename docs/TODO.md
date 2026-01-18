@@ -60,7 +60,7 @@
     - `destroy` — delete digest
     - `toggle` — enable/disable digest
 
-- [ ] **DestinationController** — CRUD for destinations
+- [x] **DestinationController** — CRUD for destinations
     - `index` — list user's destinations
     - `create` — show create form
     - `store` — create destination
@@ -83,15 +83,22 @@
 
 - [ ] `StoreDigestRequest` — validate digest creation
 - [ ] `UpdateDigestRequest` — validate digest update
-- [ ] `StoreDestinationRequest` — validate destination creation (type-specific rules)
-- [ ] `UpdateDestinationRequest` — validate destination update
+- [x] `StoreDestinationRequest` — validate destination creation (type-specific rules, max 10 limit)
+- [x] `UpdateDestinationRequest` — validate destination update
 - [ ] `StoreAiProviderRequest` — validate AI provider settings
+
+### Validation Rules
+
+- [x] `SlackWebhookUrl` — validates Slack webhook URL format
+- [x] `DiscordWebhookUrl` — validates Discord webhook URL format
 
 ### Actions
 
 - [ ] `CreateDigest` — create digest with sources and destinations
 - [ ] `UpdateDigest` — update digest, sync sources/destinations
-- [ ] `CreateDestination` — create a new destination
+- [x] `CreateDestination` — create a new destination
+- [x] `UpdateDestination` — update a destination
+- [x] `DeleteDestination` — delete a destination (detaches from digests first)
 - [ ] `CreateOrFindSource` — find existing source or create from GitHub URL
 - [ ] `FetchGitHubReleases` — fetch releases for a source
 - [ ] `CompileDigest` — compile digest run
@@ -99,6 +106,10 @@
 - [ ] `DeliverToSlack` — send digest to Slack webhook
 - [ ] `DeliverToDiscord` — send digest to Discord webhook
 - [ ] `DeliverToEmail` — send digest via email
+
+### Policies
+
+- [x] `DestinationPolicy` — authorization for destination CRUD operations
 
 ---
 
@@ -128,17 +139,17 @@
     - Same form as create, pre-filled
     - Delete button
 
-- [ ] **Destinations Index** (`pages/destinations/index.tsx`)
+- [x] **Destinations Index** (`pages/destinations/index.tsx`)
     - Card/list of destinations
     - Enable/disable toggle
     - "Add Destination" button
     - Empty state
 
-- [ ] **Destination Create** (`pages/destinations/create.tsx`)
+- [x] **Destination Create** (`pages/destinations/create.tsx`)
     - Type selector (Slack/Discord/Email)
     - Type-specific form fields
 
-- [ ] **Destination Edit** (`pages/destinations/edit.tsx`)
+- [x] **Destination Edit** (`pages/destinations/edit.tsx`)
     - Same form as create, pre-filled
     - Delete button
 
@@ -151,19 +162,26 @@
 ### Components
 
 - [ ] `DigestCard` — card showing digest summary (name, schedule, repos count, destinations count, last run)
-- [ ] `DestinationCard` — card showing destination (name, type icon, target)
+- [x] `DestinationCard` — card showing destination (name, type icon, target)
 - [ ] `RepoChip` — chip showing `owner/repo` with remove button
 - [ ] `DestinationChip` — chip showing destination with remove button
 - [ ] `ScheduleSelector` — frequency + time + day (for weekly) + timezone
-- [ ] `DestinationForm` — shared form for creating/editing destinations
+- [x] `DestinationForm` — shared form for creating/editing destinations
 - [ ] `DestinationModal` — modal wrapper for `DestinationForm` (used in digest page)
-- [ ] `EmptyState` — reusable empty state with icon, title, description, CTA
+- [x] `Empty` — using shadcn/ui empty component
 - [ ] `StatusBadge` — badge for digest run status (pending/running/completed/failed)
 
 ### Navigation
 
-- [ ] Update `app-sidebar.tsx` — add Digests, Destinations nav items
+- [x] Update `app-sidebar.tsx` — add Destinations nav item
+- [ ] Update `app-sidebar.tsx` — add Digests nav item
 - [ ] Add settings subnav for AI Provider
+
+### Types
+
+- [x] `Destination` — TypeScript type for destination model
+- [x] `DestinationType` — union type for destination types
+- [x] `DestinationConfig` — TypeScript type for destination config
 
 ---
 
@@ -172,7 +190,7 @@
 ### Feature Tests
 
 - [ ] `DigestControllerTest` — CRUD operations, attach/detach sources/destinations
-- [ ] `DestinationControllerTest` — CRUD operations
+- [x] `DestinationControllerTest` — CRUD operations (26 tests)
 - [ ] `DashboardControllerTest` — dashboard data
 
 ### Unit Tests

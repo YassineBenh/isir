@@ -3,9 +3,15 @@ import { Mail, Plus } from 'lucide-react';
 
 import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import { DestinationCard } from '@/components/destination-card';
-import { EmptyState } from '@/components/empty-state';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/components/ui/empty';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Destination } from '@/types';
 
@@ -40,15 +46,23 @@ export default function DestinationsIndex({ destinations }: Props) {
                 </div>
 
                 {destinations.length === 0 ? (
-                    <EmptyState
-                        icon={Mail}
-                        title="No destinations yet"
-                        description="Add a destination to receive your digests. You can send to Slack, Discord, or email."
-                        action={{
-                            label: 'Add Your First Destination',
-                            href: DestinationController.create().url,
-                        }}
-                    />
+                    <Empty className="border">
+                        <EmptyHeader>
+                            <EmptyMedia variant="icon">
+                                <Mail />
+                            </EmptyMedia>
+                            <EmptyTitle>No destinations yet</EmptyTitle>
+                            <EmptyDescription>
+                                Add a destination to receive your digests. You
+                                can send to Slack, Discord, or email.
+                            </EmptyDescription>
+                        </EmptyHeader>
+                        <Button asChild>
+                            <Link href={DestinationController.create().url}>
+                                Add Your First Destination
+                            </Link>
+                        </Button>
+                    </Empty>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {destinations.map((destination) => (
