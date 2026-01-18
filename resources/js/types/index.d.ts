@@ -40,3 +40,21 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export type DestinationType = 'slack' | 'discord' | 'email';
+
+export interface DestinationConfig {
+    webhook_url?: string;
+    email?: string;
+}
+
+export interface Destination {
+    id: number;
+    user_id: number;
+    type: DestinationType;
+    name: string;
+    config: DestinationConfig;
+    is_enabled: boolean;
+    created_at: string;
+    updated_at: string;
+}

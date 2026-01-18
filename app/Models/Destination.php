@@ -45,7 +45,7 @@ class Destination extends Model
      */
     public function digests(): BelongsToMany
     {
-        return $this->belongsToMany(Digest::class)->withTimestamps();
+        return $this->belongsToMany(Digest::class, 'digest_destination')->withTimestamps();
     }
 
     /**
