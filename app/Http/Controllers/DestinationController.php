@@ -8,6 +8,7 @@ use App\Actions\UpdateDestination;
 use App\Http\Requests\StoreDestinationRequest;
 use App\Http\Requests\UpdateDestinationRequest;
 use App\Models\Destination;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,11 +16,15 @@ use Inertia\Response;
 
 class DestinationController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of destinations.
      */
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', Destination::class);
+
         $destinations = $request->user()
             ->destinations()
             ->latest()
@@ -35,6 +40,8 @@ class DestinationController extends Controller
      */
     public function create(): Response
     {
+        $this->authorize('create', Destination::class);
+
         return Inertia::render('destinations/create');
     }
 
@@ -43,6 +50,8 @@ class DestinationController extends Controller
      */
     public function store(StoreDestinationRequest $request, CreateDestination $action): RedirectResponse
     {
+        $this->authorize('create', Destination::class);
+
         $action($request->user(), $request->validated());
 
         return to_route('destinations.index')
@@ -52,9 +61,9 @@ class DestinationController extends Controller
     /**
      * Show the form for editing the specified destination.
      */
-    public function edit(Request $request, Destination $destination): Response
+    public function edit(Destination $destination): Response
     {
-        $this->authorize($request, $destination);
+        $this->authorize('update', $destination);
 
         return Inertia::render('destinations/edit', [
             'destination' => $destination,
@@ -66,6 +75,8 @@ class DestinationController extends Controller
      */
     public function update(UpdateDestinationRequest $request, Destination $destination, UpdateDestination $action): RedirectResponse
     {
+        $this->authorize('update', $destination);
+
         $action($destination, $request->validated());
 
         return to_route('destinations.index')
@@ -75,9 +86,9 @@ class DestinationController extends Controller
     /**
      * Remove the specified destination.
      */
-    public function destroy(Request $request, Destination $destination, DeleteDestination $action): RedirectResponse
+    public function destroy(Destination $destination, DeleteDestination $action): RedirectResponse
     {
-        $this->authorize($request, $destination);
+        $this->authorize('delete', $destination);
 
         $action($destination);
 
@@ -88,9 +99,9 @@ class DestinationController extends Controller
     /**
      * Toggle the enabled status of the specified destination.
      */
-    public function toggle(Request $request, Destination $destination): RedirectResponse
+    public function toggle(Destination $destination): RedirectResponse
     {
-        $this->authorize($request, $destination);
+        $this->authorize('toggle', $destination);
 
         $destination->update([
             'is_enabled' => ! $destination->is_enabled,
@@ -99,13 +110,5 @@ class DestinationController extends Controller
         $status = $destination->is_enabled ? 'enabled' : 'disabled';
 
         return back()->with('success', "Destination {$status} successfully.");
-    }
-
-    /**
-     * Authorize that the user owns the destination.
-     */
-    private function authorize(Request $request, Destination $destination): void
-    {
-        abort_unless($destination->user_id === $request->user()->id, 403);
     }
 }

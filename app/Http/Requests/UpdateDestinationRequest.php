@@ -2,23 +2,11 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Destination;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateDestinationRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        $destination = $this->route('destination');
-
-        return $destination instanceof Destination
-            && $destination->user_id === $this->user()->id;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
