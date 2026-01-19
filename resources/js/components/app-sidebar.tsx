@@ -1,7 +1,8 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Send } from 'lucide-react';
+import { BookOpen, FileText, Folder, LayoutGrid, Send } from 'lucide-react';
 
 import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -24,6 +25,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Digests',
+        href: DigestController.index(),
+        icon: FileText,
     },
     {
         title: 'Destinations',

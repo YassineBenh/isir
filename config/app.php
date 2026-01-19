@@ -123,16 +123,4 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Resource Limits
-    |--------------------------------------------------------------------------
-    |
-    | These values control resource limits for users. A value of -1 means
-    | unlimited.
-    |
-    */
-
-    'max_destinations_per_user' => (int) env('MAX_DESTINATIONS_PER_USER', -1),
-
 ];

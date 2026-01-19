@@ -194,7 +194,7 @@ describe('store', function () {
     });
 
     it('enforces maximum destinations limit', function () {
-        config(['app.max_destinations_per_user' => 5]);
+        config(['isir.limits.destinations_per_user' => 5]);
 
         Destination::factory(5)->create(['user_id' => $this->user->id]);
 
@@ -208,7 +208,7 @@ describe('store', function () {
     });
 
     it('allows unlimited destinations when limit is -1', function () {
-        config(['app.max_destinations_per_user' => -1]);
+        config(['isir.limits.destinations_per_user' => -1]);
 
         Destination::factory(100)->create(['user_id' => $this->user->id]);
 

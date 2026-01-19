@@ -14,7 +14,7 @@ class StoreDestinationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $maxDestinations = config('app.max_destinations_per_user');
+        $maxDestinations = config('isir.limits.destinations_per_user');
 
         if ($maxDestinations === -1) {
             return true;
@@ -28,7 +28,7 @@ class StoreDestinationRequest extends FormRequest
      */
     protected function failedAuthorization(): void
     {
-        $maxDestinations = config('app.max_destinations_per_user');
+        $maxDestinations = config('isir.limits.destinations_per_user');
 
         abort(403, "You have reached the maximum number of destinations ({$maxDestinations}).");
     }

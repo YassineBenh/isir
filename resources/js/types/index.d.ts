@@ -58,3 +58,43 @@ export interface Destination {
     created_at: string;
     updated_at: string;
 }
+
+export type DigestFrequency = 'daily' | 'weekly';
+
+export interface Source {
+    id: number;
+    type: string;
+    canonical_key: string;
+    name: string;
+    url: string | null;
+    config: Record<string, unknown>;
+    is_enabled: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Digest {
+    id: number;
+    user_id: number;
+    name: string;
+    frequency: DigestFrequency;
+    timezone: string;
+    send_time: string;
+    send_day_of_week: number | null;
+    is_enabled: boolean;
+    ai_enabled: boolean;
+    ai_prefs: Record<string, unknown> | null;
+    last_successful_run_at: string | null;
+    created_at: string;
+    updated_at: string;
+    sources?: Source[];
+    destinations?: Destination[];
+    sources_count?: number;
+    destinations_count?: number;
+}
+
+export interface DestinationsByType {
+    slack?: Destination[];
+    discord?: Destination[];
+    email?: Destination[];
+}
