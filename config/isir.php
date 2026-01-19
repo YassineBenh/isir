@@ -15,6 +15,7 @@ return [
     'limits' => [
         'destinations_per_user' => (int) env('ISIR_MAX_DESTINATIONS_PER_USER', -1),
         'digests_per_user' => (int) env('ISIR_MAX_DIGESTS_PER_USER', -1),
+        'github_repos_per_digest' => (int) env('ISIR_MAX_GITHUB_REPOS_PER_DIGEST', 20),
     ],
 
     /*

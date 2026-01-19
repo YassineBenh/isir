@@ -36,7 +36,12 @@ class UpdateDigestRequest extends FormRequest
             ],
             'is_enabled' => ['boolean'],
             'ai_enabled' => ['boolean'],
-            'source_urls' => ['required', 'array', 'min:1'],
+            'source_urls' => [
+                'required',
+                'array',
+                'min:1',
+                ...($this->maxGithubRepos() !== -1 ? ['max:'.$this->maxGithubRepos()] : []),
+            ],
             'source_urls.*' => ['required', 'string', new GitHubRepoUrl],
             'slack_destination_id' => [
                 'nullable',
@@ -75,6 +80,7 @@ class UpdateDigestRequest extends FormRequest
         return [
             'source_urls.required' => 'At least one GitHub repository is required.',
             'source_urls.min' => 'At least one GitHub repository is required.',
+            'source_urls.max' => 'You cannot add more than :max repositories.',
             'send_day_of_week.required_if' => 'The day of week is required for weekly digests.',
             'slack_destination_id.exists' => 'The selected Slack destination is invalid.',
             'discord_destination_id.exists' => 'The selected Discord destination is invalid.',
@@ -112,5 +118,13 @@ class UpdateDigestRequest extends FormRequest
             $this->validated('discord_destination_id'),
             $this->validated('email_destination_id'),
         ]);
+    }
+
+    /**
+     * Get the maximum number of GitHub repos per digest.
+     */
+    public function maxGithubRepos(): int
+    {
+        return config('isir.limits.github_repos_per_digest');
     }
 }

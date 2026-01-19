@@ -80,6 +80,16 @@ describe('create', function () {
             ->has('destinations.email', 1)
         );
     });
+
+    it('passes maxRepos config value', function () {
+        config(['isir.limits.github_repos_per_digest' => 15]);
+
+        $response = $this->actingAs($this->user)->get('/digests/create');
+
+        $response->assertInertia(fn ($page) => $page
+            ->where('maxRepos', 15)
+        );
+    });
 });
 
 describe('store', function () {
@@ -286,6 +296,60 @@ describe('store', function () {
         $digest = Digest::first();
         expect($digest->sources)->toHaveCount(4);
     });
+
+    it('enforces maximum github repos per digest limit', function () {
+        config(['isir.limits.github_repos_per_digest' => 3]);
+
+        $repos = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $repos[] = "owner/repo{$i}";
+        }
+
+        $response = $this->actingAs($this->user)->post('/digests', [
+            'name' => 'Too Many Repos',
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => $repos,
+        ]);
+
+        $response->assertSessionHasErrors('source_urls');
+    });
+
+    it('allows repos at the limit', function () {
+        config(['isir.limits.github_repos_per_digest' => 3]);
+
+        $response = $this->actingAs($this->user)->post('/digests', [
+            'name' => 'At Limit',
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => ['owner/repo1', 'owner/repo2', 'owner/repo3'],
+        ]);
+
+        $response->assertRedirect('/digests');
+        expect(Digest::first()->sources)->toHaveCount(3);
+    });
+
+    it('allows unlimited repos when limit is -1', function () {
+        config(['isir.limits.github_repos_per_digest' => -1]);
+
+        $repos = [];
+        for ($i = 1; $i <= 25; $i++) {
+            $repos[] = "owner/repo{$i}";
+        }
+
+        $response = $this->actingAs($this->user)->post('/digests', [
+            'name' => 'Unlimited Repos',
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => $repos,
+        ]);
+
+        $response->assertRedirect('/digests');
+        expect(Digest::first()->sources)->toHaveCount(25);
+    });
 });
 
 describe('edit', function () {
@@ -310,6 +374,18 @@ describe('edit', function () {
         $response = $this->actingAs($this->user)->get("/digests/{$otherDigest->id}/edit");
 
         $response->assertForbidden();
+    });
+
+    it('passes maxRepos config value', function () {
+        config(['isir.limits.github_repos_per_digest' => 15]);
+
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+
+        $response = $this->actingAs($this->user)->get("/digests/{$digest->id}/edit");
+
+        $response->assertInertia(fn ($page) => $page
+            ->where('maxRepos', 15)
+        );
     });
 });
 
@@ -372,6 +448,49 @@ describe('update', function () {
         ]);
 
         $response->assertForbidden();
+    });
+
+    it('enforces maximum github repos per digest limit on update', function () {
+        config(['isir.limits.github_repos_per_digest' => 3]);
+
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+
+        $repos = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $repos[] = "owner/repo{$i}";
+        }
+
+        $response = $this->actingAs($this->user)->put("/digests/{$digest->id}", [
+            'name' => $digest->name,
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => $repos,
+        ]);
+
+        $response->assertSessionHasErrors('source_urls');
+    });
+
+    it('allows unlimited repos on update when limit is -1', function () {
+        config(['isir.limits.github_repos_per_digest' => -1]);
+
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+
+        $repos = [];
+        for ($i = 1; $i <= 25; $i++) {
+            $repos[] = "owner/repo{$i}";
+        }
+
+        $response = $this->actingAs($this->user)->put("/digests/{$digest->id}", [
+            'name' => $digest->name,
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => $repos,
+        ]);
+
+        $response->assertRedirect('/digests');
+        expect($digest->refresh()->sources)->toHaveCount(25);
     });
 });
 

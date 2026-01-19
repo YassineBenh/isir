@@ -51,6 +51,7 @@ class DigestController extends Controller
                 ->get()
                 ->groupBy('type'),
             'timezones' => config('isir.timezones'),
+            'maxRepos' => config('isir.limits.github_repos_per_digest'),
         ]);
     }
 
@@ -84,6 +85,7 @@ class DigestController extends Controller
                 ->get()
                 ->groupBy('type'),
             'timezones' => config('isir.timezones'),
+            'maxRepos' => config('isir.limits.github_repos_per_digest'),
         ]);
     }
 

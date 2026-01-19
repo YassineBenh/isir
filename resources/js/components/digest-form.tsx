@@ -30,6 +30,7 @@ interface DigestFormProps {
     digest?: Digest;
     destinations: DestinationsByType;
     timezones: string[];
+    maxRepos: number;
     onCancel?: () => void;
 }
 
@@ -71,6 +72,7 @@ export function DigestForm({
     digest,
     destinations,
     timezones,
+    maxRepos,
     onCancel,
 }: DigestFormProps) {
     const isEditing = !!digest;
@@ -116,6 +118,11 @@ export function DigestForm({
 
         if (data.source_urls.includes(normalized)) {
             setRepoError('This repository is already added.');
+            return;
+        }
+
+        if (maxRepos !== -1 && data.source_urls.length >= maxRepos) {
+            setRepoError(`You cannot add more than ${maxRepos} repositories.`);
             return;
         }
 
@@ -187,7 +194,14 @@ export function DigestForm({
 
             {/* Repositories */}
             <div className="space-y-4">
-                <h3 className="text-sm font-medium">GitHub Repositories</h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">GitHub Repositories</h3>
+                    {maxRepos !== -1 && (
+                        <span className="text-xs text-muted-foreground">
+                            {data.source_urls.length}/{maxRepos}
+                        </span>
+                    )}
+                </div>
                 <p className="text-xs text-muted-foreground">
                     Add repositories to track. Paste a GitHub URL or use
                     owner/repo format.
@@ -208,7 +222,11 @@ export function DigestForm({
                         type="button"
                         variant="secondary"
                         onClick={handleAddRepo}
-                        disabled={!repoInput.trim()}
+                        disabled={
+                            !repoInput.trim() ||
+                            (maxRepos !== -1 &&
+                                data.source_urls.length >= maxRepos)
+                        }
                     >
                         <Plus className="mr-1 size-4" />
                         Add

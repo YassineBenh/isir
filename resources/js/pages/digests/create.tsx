@@ -21,9 +21,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Props {
     destinations: DestinationsByType;
     timezones: string[];
+    maxRepos: number;
 }
 
-export default function DigestCreate({ destinations, timezones }: Props) {
+export default function DigestCreate({
+    destinations,
+    timezones,
+    maxRepos,
+}: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Digest" />
@@ -39,6 +44,7 @@ export default function DigestCreate({ destinations, timezones }: Props) {
                         <DigestForm
                             destinations={destinations}
                             timezones={timezones}
+                            maxRepos={maxRepos}
                             onCancel={() =>
                                 router.visit(DigestController.index().url)
                             }
