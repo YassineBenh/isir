@@ -1,9 +1,9 @@
-import { Link, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useState } from 'react';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import DigestController from '@/actions/App/Http/Controllers/DigestController';
+import { DestinationModal } from '@/components/destination-modal';
 import InputError from '@/components/input-error';
 import { RepoChip } from '@/components/repo-chip';
 import { ScheduleSelector } from '@/components/schedule-selector';
@@ -236,12 +236,7 @@ export function DigestForm({
             <div className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-medium">Destinations</h3>
-                    <Button asChild variant="ghost" size="sm">
-                        <Link href={DestinationController.create().url}>
-                            <Plus className="mr-1 size-4" />
-                            Add New
-                        </Link>
-                    </Button>
+                    <DestinationModal />
                 </div>
                 <p className="text-xs text-muted-foreground">
                     Select where to deliver your digest. You can choose one
@@ -249,16 +244,15 @@ export function DigestForm({
                 </p>
 
                 {hasNoDestinations ? (
-                    <p className="text-sm text-muted-foreground">
-                        No destinations configured.{' '}
-                        <Link
-                            href={DestinationController.create().url}
-                            className="text-primary underline underline-offset-4"
-                        >
-                            Create one first
-                        </Link>
-                        .
-                    </p>
+                    <div className="rounded-lg border border-dashed p-4 text-center">
+                        <p className="text-sm text-muted-foreground">
+                            No destinations configured yet.
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Click "Add New" above to create your first
+                            destination.
+                        </p>
+                    </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-3">
                         <DestinationSelect

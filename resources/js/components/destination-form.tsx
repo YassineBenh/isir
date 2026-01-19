@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { type FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import InputError from '@/components/input-error';
@@ -17,7 +17,9 @@ import { type Destination, type DestinationType } from '@/types';
 
 interface DestinationFormProps {
     destination?: Destination;
+    defaultType?: DestinationType;
     onCancel?: () => void;
+    onSuccess?: (destination: Destination) => void;
 }
 
 interface FormData {
@@ -29,25 +31,75 @@ interface FormData {
 
 export function DestinationForm({
     destination,
+    defaultType,
     onCancel,
+    onSuccess,
 }: DestinationFormProps) {
     const isEditing = !!destination;
+    const [fetchErrors, setFetchErrors] = useState<Record<string, string>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { data, setData, post, put, processing, errors } = useForm<FormData>({
-        type: destination?.type ?? 'slack',
-        name: destination?.name ?? '',
-        webhook_url: destination?.config.webhook_url ?? '',
-        email: destination?.config.email ?? '',
-    });
+    const { data, setData, post, put, processing, errors, reset } =
+        useForm<FormData>({
+            type: destination?.type ?? defaultType ?? 'slack',
+            name: destination?.name ?? '',
+            webhook_url: destination?.config.webhook_url ?? '',
+            email: destination?.config.email ?? '',
+        });
 
-    function handleSubmit(e: FormEvent) {
+    const allErrors = { ...errors, ...fetchErrors };
+    const isProcessing = processing || isSubmitting;
+
+    async function handleSubmit(e: FormEvent) {
         e.preventDefault();
+        setFetchErrors({});
 
         if (isEditing) {
             put(DestinationController.update(destination).url);
-        } else {
-            post(DestinationController.store().url);
+            return;
         }
+
+        // Modal mode: use fetch with no_redirect
+        if (onSuccess) {
+            setIsSubmitting(true);
+
+            const csrfToken = document
+                .querySelector('meta[name="csrf-token"]')
+                ?.getAttribute('content');
+
+            try {
+                const response = await fetch(
+                    DestinationController.store().url,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                            'X-CSRF-TOKEN': csrfToken ?? '',
+                        },
+                        body: JSON.stringify({
+                            ...data,
+                            no_redirect: true,
+                        }),
+                    },
+                );
+
+                if (response.ok) {
+                    const result = await response.json();
+                    reset();
+                    onSuccess(result.destination);
+                } else if (response.status === 422) {
+                    const result = await response.json();
+                    setFetchErrors(result.errors ?? {});
+                }
+            } finally {
+                setIsSubmitting(false);
+            }
+            return;
+        }
+
+        // Normal mode: use Inertia post with redirect
+        post(DestinationController.store().url);
     }
 
     return (
@@ -70,7 +122,7 @@ export function DestinationForm({
                         <SelectItem value="email">Email</SelectItem>
                     </SelectContent>
                 </Select>
-                <InputError message={errors.type} />
+                <InputError message={allErrors.type} />
             </div>
 
             <div className="grid gap-2">
@@ -86,7 +138,7 @@ export function DestinationForm({
                     }
                     required
                 />
-                <InputError message={errors.name} />
+                <InputError message={allErrors.name} />
             </div>
 
             {data.type !== 'email' && (
@@ -109,7 +161,7 @@ export function DestinationForm({
                             ? 'Create an incoming webhook in your Slack workspace settings.'
                             : 'Create a webhook in your Discord server settings.'}
                     </p>
-                    <InputError message={errors.webhook_url} />
+                    <InputError message={allErrors.webhook_url} />
                 </div>
             )}
 
@@ -124,7 +176,7 @@ export function DestinationForm({
                         placeholder="you@example.com"
                         required
                     />
-                    <InputError message={errors.email} />
+                    <InputError message={allErrors.email} />
                 </div>
             )}
 
@@ -134,8 +186,8 @@ export function DestinationForm({
                         Cancel
                     </Button>
                 )}
-                <Button type="submit" disabled={processing}>
-                    {processing
+                <Button type="submit" disabled={isProcessing}>
+                    {isProcessing
                         ? 'Saving...'
                         : isEditing
                           ? 'Update Destination'

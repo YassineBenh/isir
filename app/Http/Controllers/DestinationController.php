@@ -9,6 +9,7 @@ use App\Http\Requests\StoreDestinationRequest;
 use App\Http\Requests\UpdateDestinationRequest;
 use App\Models\Destination;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -48,11 +49,17 @@ class DestinationController extends Controller
     /**
      * Store a newly created destination.
      */
-    public function store(StoreDestinationRequest $request, CreateDestination $action): RedirectResponse
+    public function store(StoreDestinationRequest $request, CreateDestination $action): RedirectResponse|JsonResponse
     {
         $this->authorize('create', Destination::class);
 
-        $action($request->user(), $request->validated());
+        $destination = $action($request->user(), $request->validated());
+
+        if ($request->boolean('no_redirect')) {
+            return response()->json([
+                'destination' => $destination,
+            ]);
+        }
 
         return to_route('destinations.index')
             ->with('success', 'Destination created successfully.');
