@@ -9,14 +9,18 @@ use Illuminate\Validation\Rule;
 
 class StoreDestinationRequest extends FormRequest
 {
-    public const int MAX_DESTINATIONS_PER_USER = 10;
-
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()->destinations()->count() < self::MAX_DESTINATIONS_PER_USER;
+        $maxDestinations = config('app.max_destinations_per_user');
+
+        if ($maxDestinations === -1) {
+            return true;
+        }
+
+        return $this->user()->destinations()->count() < $maxDestinations;
     }
 
     /**
@@ -24,7 +28,9 @@ class StoreDestinationRequest extends FormRequest
      */
     protected function failedAuthorization(): void
     {
-        abort(403, 'You have reached the maximum number of destinations ('.self::MAX_DESTINATIONS_PER_USER.').');
+        $maxDestinations = config('app.max_destinations_per_user');
+
+        abort(403, "You have reached the maximum number of destinations ({$maxDestinations}).");
     }
 
     /**
