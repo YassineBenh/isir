@@ -39,7 +39,7 @@ export default function DigestEdit({ digest, destinations, timezones }: Props) {
                     description={`Update settings for ${digest.name}.`}
                 />
 
-                <Card className="max-w-2xl">
+                <Card>
                     <CardContent className="pt-6">
                         <DigestForm
                             digest={digest}

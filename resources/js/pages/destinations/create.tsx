@@ -29,7 +29,7 @@ export default function DestinationCreate() {
                     description="Add a new destination for your digests."
                 />
 
-                <Card className="max-w-2xl">
+                <Card>
                     <CardContent className="pt-6">
                         <DestinationForm
                             onCancel={() =>

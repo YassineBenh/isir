@@ -1,5 +1,6 @@
 import { Link, router } from '@inertiajs/react';
 import {
+    Brain,
     Calendar,
     GitBranch,
     Mail,
@@ -83,7 +84,19 @@ export function DigestCard({ digest }: DigestCardProps) {
         <Card className="relative">
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="space-y-1">
-                    <CardTitle className="text-base">{digest.name}</CardTitle>
+                    <CardTitle className="flex items-center gap-1.5 text-base">
+                        {digest.name}
+                        {digest.ai_enabled && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Brain className="size-4 text-muted-foreground" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>AI summarized</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
+                    </CardTitle>
                     <CardDescription className="flex items-center gap-1.5 text-xs">
                         <Calendar className="size-3" />
                         {scheduleText}

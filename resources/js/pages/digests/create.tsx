@@ -34,7 +34,7 @@ export default function DigestCreate({ destinations, timezones }: Props) {
                     description="Set up a new release digest for your repositories."
                 />
 
-                <Card className="max-w-2xl">
+                <Card>
                     <CardContent className="pt-6">
                         <DigestForm
                             destinations={destinations}
