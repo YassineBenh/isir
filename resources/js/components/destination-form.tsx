@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { AxiosError } from 'axios';
 import { type FormEvent, useState } from 'react';
 
 import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
@@ -13,6 +14,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import axios from '@/lib/axios';
 import { type Destination, type DestinationType } from '@/types';
 
 interface DestinationFormProps {
@@ -52,6 +54,7 @@ export function DestinationForm({
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
+        e.stopPropagation();
         setFetchErrors({});
 
         if (isEditing) {
@@ -59,38 +62,24 @@ export function DestinationForm({
             return;
         }
 
-        // Modal mode: use fetch with no_redirect
+        // Modal mode: use axios with no_redirect
         if (onSuccess) {
             setIsSubmitting(true);
 
-            const csrfToken = document
-                .querySelector('meta[name="csrf-token"]')
-                ?.getAttribute('content');
-
             try {
-                const response = await fetch(
+                const response = await axios.post(
                     DestinationController.store().url,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Accept: 'application/json',
-                            'X-CSRF-TOKEN': csrfToken ?? '',
-                        },
-                        body: JSON.stringify({
-                            ...data,
-                            no_redirect: true,
-                        }),
-                    },
+                    { ...data, no_redirect: true },
                 );
 
-                if (response.ok) {
-                    const result = await response.json();
-                    reset();
-                    onSuccess(result.destination);
-                } else if (response.status === 422) {
-                    const result = await response.json();
-                    setFetchErrors(result.errors ?? {});
+                reset();
+                onSuccess(response.data.destination);
+            } catch (error) {
+                if (
+                    error instanceof AxiosError &&
+                    error.response?.status === 422
+                ) {
+                    setFetchErrors(error.response.data.errors ?? {});
                 }
             } finally {
                 setIsSubmitting(false);

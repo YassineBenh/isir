@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { DestinationForm } from '@/components/destination-form';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { type DestinationType } from '@/types';
+import { type Destination, type DestinationType } from '@/types';
 
 interface DestinationModalProps {
     triggerLabel?: string;
@@ -24,6 +25,14 @@ export function DestinationModal({
     defaultType,
 }: DestinationModalProps) {
     const [open, setOpen] = useState(false);
+
+    function handleSuccess(destination: Destination) {
+        setOpen(false);
+        toast.success(
+            `Destination "${destination.name}" created successfully.`,
+        );
+        router.reload({ only: ['destinations'] });
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -44,10 +53,7 @@ export function DestinationModal({
                 <DestinationForm
                     defaultType={defaultType}
                     onCancel={() => setOpen(false)}
-                    onSuccess={() => {
-                        setOpen(false);
-                        router.reload({ only: ['destinations'] });
-                    }}
+                    onSuccess={handleSuccess}
                 />
             </DialogContent>
         </Dialog>

@@ -44,14 +44,12 @@ class DigestController extends Controller
     {
         $this->authorize('create', Digest::class);
 
-        $destinations = $request->user()
-            ->destinations()
-            ->where('is_enabled', true)
-            ->get()
-            ->groupBy('type');
-
         return Inertia::render('digests/create', [
-            'destinations' => $destinations,
+            'destinations' => fn () => $request->user()
+                ->destinations()
+                ->where('is_enabled', true)
+                ->get()
+                ->groupBy('type'),
             'timezones' => config('isir.timezones'),
         ]);
     }
@@ -78,15 +76,13 @@ class DigestController extends Controller
 
         $digest->load(['sources', 'destinations']);
 
-        $destinations = $request->user()
-            ->destinations()
-            ->where('is_enabled', true)
-            ->get()
-            ->groupBy('type');
-
         return Inertia::render('digests/edit', [
             'digest' => $digest,
-            'destinations' => $destinations,
+            'destinations' => fn () => $request->user()
+                ->destinations()
+                ->where('is_enabled', true)
+                ->get()
+                ->groupBy('type'),
             'timezones' => config('isir.timezones'),
         ]);
     }
