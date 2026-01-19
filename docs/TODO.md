@@ -51,7 +51,7 @@
 
 ### Controllers & Routes
 
-- [ ] **DigestController** — CRUD for digests
+- [x] **DigestController** — CRUD for digests
     - `index` — list user's digests
     - `create` — show create form
     - `store` — create digest + attach sources/destinations
@@ -81,8 +81,8 @@
 
 ### Form Requests
 
-- [ ] `StoreDigestRequest` — validate digest creation
-- [ ] `UpdateDigestRequest` — validate digest update
+- [x] `StoreDigestRequest` — validate digest creation
+- [x] `UpdateDigestRequest` — validate digest update
 - [x] `StoreDestinationRequest` — validate destination creation (type-specific rules, max 10 limit)
 - [x] `UpdateDestinationRequest` — validate destination update
 - [ ] `StoreAiProviderRequest` — validate AI provider settings
@@ -91,15 +91,17 @@
 
 - [x] `SlackWebhookUrl` — validates Slack webhook URL format
 - [x] `DiscordWebhookUrl` — validates Discord webhook URL format
+- [x] `GitHubRepoUrl` — validates GitHub repo URL or owner/repo format
 
 ### Actions
 
-- [ ] `CreateDigest` — create digest with sources and destinations
-- [ ] `UpdateDigest` — update digest, sync sources/destinations
+- [x] `CreateDigest` — create digest with sources and destinations
+- [x] `UpdateDigest` — update digest, sync sources/destinations
+- [x] `DeleteDigest` — delete digest (detaches sources/destinations first)
 - [x] `CreateDestination` — create a new destination
 - [x] `UpdateDestination` — update a destination
 - [x] `DeleteDestination` — delete a destination (detaches from digests first)
-- [ ] `CreateOrFindSource` — find existing source or create from GitHub URL
+- [x] `FindOrCreateSource` — find existing source or create from GitHub URL
 - [ ] `FetchGitHubReleases` — fetch releases for a source
 - [ ] `CompileDigest` — compile digest run
 - [ ] `SummarizeSourceItem` — generate AI summary for a source item
@@ -109,6 +111,7 @@
 
 ### Policies
 
+- [x] `DigestPolicy` — authorization for digest CRUD operations
 - [x] `DestinationPolicy` — authorization for destination CRUD operations
 
 ---
@@ -122,20 +125,20 @@
     - Quick stats
     - Empty state → prompt to create digest
 
-- [ ] **Digests Index** (`pages/digests/index.tsx`)
+- [x] **Digests Index** (`pages/digests/index.tsx`)
     - Card grid of user's digests
     - Enable/disable toggle per card
     - "New Digest" button
     - Empty state
 
-- [ ] **Digest Create** (`pages/digests/create.tsx`)
+- [x] **Digest Create** (`pages/digests/create.tsx`)
     - Single-page form with sections
     - Name + schedule inputs
     - Repository URL paste + chip list
-    - Destination selector + "Add Destination" modal
-    - AI settings accordion
+    - Destination selector (3 selects by type)
+    - AI settings toggle
 
-- [ ] **Digest Edit** (`pages/digests/edit.tsx`)
+- [x] **Digest Edit** (`pages/digests/edit.tsx`)
     - Same form as create, pre-filled
     - Delete button
 
@@ -161,12 +164,13 @@
 
 ### Components
 
-- [ ] `DigestCard` — card showing digest summary (name, schedule, repos count, destinations count, last run)
+- [x] `DigestCard` — card showing digest summary (name, schedule, repos count, destinations count, last run)
 - [x] `DestinationCard` — card showing destination (name, type icon, target)
-- [ ] `RepoChip` — chip showing `owner/repo` with remove button
+- [x] `RepoChip` — chip showing `owner/repo` with remove button
 - [ ] `DestinationChip` — chip showing destination with remove button
-- [ ] `ScheduleSelector` — frequency + time + day (for weekly) + timezone
+- [x] `ScheduleSelector` — frequency + time + day (for weekly) + timezone
 - [x] `DestinationForm` — shared form for creating/editing destinations
+- [x] `DigestForm` — shared form for creating/editing digests
 - [ ] `DestinationModal` — modal wrapper for `DestinationForm` (used in digest page)
 - [x] `Empty` — using shadcn/ui empty component
 - [ ] `StatusBadge` — badge for digest run status (pending/running/completed/failed)
@@ -174,7 +178,7 @@
 ### Navigation
 
 - [x] Update `app-sidebar.tsx` — add Destinations nav item
-- [ ] Update `app-sidebar.tsx` — add Digests nav item
+- [x] Update `app-sidebar.tsx` — add Digests nav item
 - [ ] Add settings subnav for AI Provider
 
 ### Types
@@ -182,6 +186,10 @@
 - [x] `Destination` — TypeScript type for destination model
 - [x] `DestinationType` — union type for destination types
 - [x] `DestinationConfig` — TypeScript type for destination config
+- [x] `Digest` — TypeScript type for digest model
+- [x] `DigestFrequency` — union type for digest frequencies
+- [x] `Source` — TypeScript type for source model
+- [x] `DestinationsByType` — TypeScript type for destinations grouped by type
 
 ---
 
@@ -189,8 +197,8 @@
 
 ### Feature Tests
 
-- [ ] `DigestControllerTest` — CRUD operations, attach/detach sources/destinations
-- [x] `DestinationControllerTest` — CRUD operations (26 tests)
+- [x] `DigestControllerTest` — CRUD operations, attach/detach sources/destinations (28 tests)
+- [x] `DestinationControllerTest` — CRUD operations (27 tests)
 - [ ] `DashboardControllerTest` — dashboard data
 
 ### Unit Tests
@@ -212,14 +220,18 @@
 
 ## Configuration
 
-- [ ] Add `config/isir.php` — app-specific config
-    - Default AI provider/model
-    - GitHub API rate limit handling
-    - Digest compilation settings
+- [x] Add `config/isir.php` — app-specific config
+    - [x] Resource limits (digests/destinations per user)
+    - [x] Curated timezone list
+    - [ ] Default AI provider/model
+    - [ ] GitHub API rate limit handling
+    - [ ] Digest compilation settings
 
 - [ ] Add environment variables
-    - `ISIR_DEFAULT_AI_PROVIDER`
-    - `ISIR_DEFAULT_AI_MODEL`
+    - [x] `ISIR_MAX_DESTINATIONS_PER_USER`
+    - [x] `ISIR_MAX_DIGESTS_PER_USER`
+    - [ ] `ISIR_DEFAULT_AI_PROVIDER`
+    - [ ] `ISIR_DEFAULT_AI_MODEL`
 
 ---
 
