@@ -1,7 +1,54 @@
 <?php
 
+use App\Models\Source;
 use App\Rules\GitHubRepoExists;
 use App\Services\GitHubService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('passes validation when repo exists in database without calling GitHub API', function () {
+    // Create a source in the database
+    Source::factory()->create([
+        'name' => 'laravel/framework',
+    ]);
+
+    // Mock should NOT be called since repo exists in DB
+    $mockService = Mockery::mock(GitHubService::class);
+    $mockService->shouldNotReceive('repoExistsByUrl');
+
+    app()->instance(GitHubService::class, $mockService);
+
+    $rule = new GitHubRepoExists;
+    $failed = false;
+
+    $rule->validate('source_urls.0', 'laravel/framework', function () use (&$failed) {
+        $failed = true;
+    });
+
+    expect($failed)->toBeFalse();
+});
+
+it('passes validation when repo exists in database with different URL format', function () {
+    Source::factory()->create([
+        'name' => 'laravel/framework',
+    ]);
+
+    $mockService = Mockery::mock(GitHubService::class);
+    $mockService->shouldNotReceive('repoExistsByUrl');
+
+    app()->instance(GitHubService::class, $mockService);
+
+    $rule = new GitHubRepoExists;
+    $failed = false;
+
+    // Test with full URL format
+    $rule->validate('source_urls.0', 'https://github.com/laravel/framework', function () use (&$failed) {
+        $failed = true;
+    });
+
+    expect($failed)->toBeFalse();
+});
 
 it('fails validation when repo does not exist', function () {
     $mockService = Mockery::mock(GitHubService::class);

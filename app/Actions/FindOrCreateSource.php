@@ -18,17 +18,18 @@ class FindOrCreateSource
             throw new \InvalidArgumentException("Invalid GitHub URL: {$url}");
         }
 
-        $canonicalKey = 'github:'.$parsed['owner'].'/'.$parsed['repo'];
+        $owner = strtolower($parsed['owner']);
+        $repo = strtolower($parsed['repo']);
 
         return Source::firstOrCreate(
-            ['canonical_key' => $canonicalKey],
+            ['canonical_key' => "github:{$owner}/{$repo}"],
             [
                 'type' => 'github_repo',
-                'name' => $parsed['owner'].'/'.$parsed['repo'],
-                'url' => 'https://github.com/'.$parsed['owner'].'/'.$parsed['repo'],
+                'name' => "{$owner}/{$repo}",
+                'url' => "https://github.com/{$owner}/{$repo}",
                 'config' => [
-                    'owner' => $parsed['owner'],
-                    'repo' => $parsed['repo'],
+                    'owner' => $owner,
+                    'repo' => $repo,
                 ],
                 'is_enabled' => true,
             ]
