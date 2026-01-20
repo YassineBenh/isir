@@ -79,19 +79,20 @@ export function DigestForm({
     const [repoInput, setRepoInput] = useState('');
     const [repoError, setRepoError] = useState<string | null>(null);
 
-    const { data, setData, post, put, processing, errors } = useForm<FormData>({
-        name: digest?.name ?? '',
-        frequency: digest?.frequency ?? 'daily',
-        timezone: digest?.timezone ?? 'UTC',
-        send_time: digest?.send_time?.slice(0, 5) ?? '09:00',
-        send_day_of_week: digest?.send_day_of_week ?? 1,
-        is_enabled: digest?.is_enabled ?? true,
-        ai_enabled: digest?.ai_enabled ?? true,
-        source_urls: digest?.sources?.map((s) => s.name) ?? [],
-        slack_destination_id: getDestinationIdForType(digest, 'slack'),
-        discord_destination_id: getDestinationIdForType(digest, 'discord'),
-        email_destination_id: getDestinationIdForType(digest, 'email'),
-    });
+    const { data, setData, post, put, processing, errors, clearErrors } =
+        useForm<FormData>({
+            name: digest?.name ?? '',
+            frequency: digest?.frequency ?? 'daily',
+            timezone: digest?.timezone ?? 'UTC',
+            send_time: digest?.send_time?.slice(0, 5) ?? '09:00',
+            send_day_of_week: digest?.send_day_of_week ?? 1,
+            is_enabled: digest?.is_enabled ?? true,
+            ai_enabled: digest?.ai_enabled ?? true,
+            source_urls: digest?.sources?.map((s) => s.name) ?? [],
+            slack_destination_id: getDestinationIdForType(digest, 'slack'),
+            discord_destination_id: getDestinationIdForType(digest, 'discord'),
+            email_destination_id: getDestinationIdForType(digest, 'email'),
+        });
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
@@ -129,6 +130,12 @@ export function DigestForm({
         setData('source_urls', [...data.source_urls, normalized]);
         setRepoInput('');
         setRepoError(null);
+        // Clear any previous server-side validation errors for repos
+        clearErrors(
+            ...(Object.keys(errors).filter((key) =>
+                key.startsWith('source_urls'),
+            ) as (keyof typeof errors)[]),
+        );
     }
 
     function handleRepoKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -142,6 +149,12 @@ export function DigestForm({
         setData(
             'source_urls',
             data.source_urls.filter((r) => r !== repo),
+        );
+        // Clear any previous server-side validation errors for repos
+        clearErrors(
+            ...(Object.keys(errors).filter((key) =>
+                key.startsWith('source_urls'),
+            ) as (keyof typeof errors)[]),
         );
     }
 
