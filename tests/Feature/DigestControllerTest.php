@@ -4,9 +4,16 @@ use App\Models\Destination;
 use App\Models\Digest;
 use App\Models\Source;
 use App\Models\User;
+use App\Services\GitHubService;
 
 beforeEach(function () {
     $this->user = User::factory()->create();
+
+    // Mock GitHubService to always return that repos exist
+    $this->mock(GitHubService::class, function ($mock) {
+        $mock->shouldReceive('repoExistsByUrl')
+            ->andReturn(['exists' => true, 'error' => null]);
+    });
 });
 
 describe('index', function () {
@@ -225,6 +232,25 @@ describe('store', function () {
             'timezone' => 'UTC',
             'send_time' => '09:00',
             'source_urls' => ['not-a-valid-repo'],
+        ]);
+
+        $response->assertSessionHasErrors('source_urls.0');
+    });
+
+    it('validates repository exists on github', function () {
+        // Override the mock to simulate non-existent repo
+        $this->mock(GitHubService::class, function ($mock) {
+            $mock->shouldReceive('repoExistsByUrl')
+                ->with('nonexistent/repo')
+                ->andReturn(['exists' => false, 'error' => null]);
+        });
+
+        $response = $this->actingAs($this->user)->post('/digests', [
+            'name' => 'Test',
+            'frequency' => 'daily',
+            'timezone' => 'UTC',
+            'send_time' => '09:00',
+            'source_urls' => ['nonexistent/repo'],
         ]);
 
         $response->assertSessionHasErrors('source_urls.0');

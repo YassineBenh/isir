@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\GitHubRepoExists;
 use App\Rules\GitHubRepoUrl;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -58,7 +59,7 @@ class StoreDigestRequest extends FormRequest
                 'min:1',
                 ...($this->maxGithubRepos() !== -1 ? ['max:'.$this->maxGithubRepos()] : []),
             ],
-            'source_urls.*' => ['required', 'string', new GitHubRepoUrl],
+            'source_urls.*' => ['required', 'string', new GitHubRepoUrl, new GitHubRepoExists],
             'slack_destination_id' => [
                 'nullable',
                 'integer',

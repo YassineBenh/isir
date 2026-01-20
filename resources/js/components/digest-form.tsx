@@ -233,15 +233,31 @@ export function DigestForm({
                     </Button>
                 </div>
                 <InputError message={repoError ?? errors.source_urls} />
+                {/* Show summary if there are individual repo errors */}
+                {!repoError &&
+                    !errors.source_urls &&
+                    data.source_urls.some(
+                        (_, index) =>
+                            errors[
+                                `source_urls.${index}` as keyof typeof errors
+                            ],
+                    ) && (
+                        <InputError message="One or more repositories could not be verified. Hover over red badges for details." />
+                    )}
 
                 {data.source_urls.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                        {data.source_urls.map((repo) => (
+                        {data.source_urls.map((repo, index) => (
                             <RepoChip
                                 key={repo}
                                 repo={repo}
                                 onRemove={() => handleRemoveRepo(repo)}
                                 disabled={processing}
+                                error={
+                                    errors[
+                                        `source_urls.${index}` as keyof typeof errors
+                                    ]
+                                }
                             />
                         ))}
                     </div>
