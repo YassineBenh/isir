@@ -43,18 +43,12 @@ return [
         'main' => [
             'method' => env('GITHUB_TOKEN') ? 'token' : 'none',
             'token' => env('GITHUB_TOKEN'),
-            // 'backoff'    => false,
-            // 'cache'      => false,
-            // 'version'    => 'v3',
-            // 'enterprise' => false,
+            'cache' => 'main',
         ],
 
         'none' => [
             'method' => 'none',
-            // 'backoff'    => false,
-            // 'cache'      => false,
-            // 'version'    => 'v3',
-            // 'enterprise' => false,
+            'cache' => 'main',
         ],
 
     ],
@@ -73,17 +67,10 @@ return [
     'cache' => [
 
         'main' => [
-            'driver'    => 'illuminate',
-            'connector' => null, // null means use default driver
-            // 'min'       => 43200,
-            // 'max'       => 172800
-        ],
-
-        'bar' => [
-            'driver'    => 'illuminate',
-            'connector' => 'redis', // config/cache.php
-            // 'min'       => 43200,
-            // 'max'       => 172800
+            'driver' => 'illuminate',
+            'connector' => null,
+            // 'min' => 43200,  // 12 hours
+            // 'max' => 172800, // 48 hours
         ],
 
     ],
