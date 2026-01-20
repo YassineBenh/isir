@@ -76,4 +76,14 @@ class GitHubService
             'errors' => $errors,
         ];
     }
+
+    /**
+     * Fetch all releases for a repository.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function fetchReleases(string $owner, string $repo): array
+    {
+        return $this->github->repo()->releases()->all($owner, $repo);
+    }
 }
