@@ -252,3 +252,4 @@
 - [ ] YouTube channel source type
 - [ ] Team/organization support
 - [ ] Notification preferences
+- [ ] API endpoint to retrieve content of a digest
