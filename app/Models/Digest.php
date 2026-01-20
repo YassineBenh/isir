@@ -22,6 +22,7 @@ class Digest extends Model
         'send_day_of_week',
         'is_enabled',
         'last_successful_run_at',
+        'last_dispatched_at',
         'ai_enabled',
         'ai_prefs',
     ];
@@ -36,6 +37,7 @@ class Digest extends Model
             'ai_enabled' => 'boolean',
             'ai_prefs' => 'array',
             'last_successful_run_at' => 'datetime',
+            'last_dispatched_at' => 'datetime',
             'send_day_of_week' => 'integer',
         ];
     }

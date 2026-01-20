@@ -16,7 +16,7 @@ class DispatchDueDigestsCommand extends Command
 
     public function handle(): int
     {
-        $now = now();
+        $now = Carbon::instance(now());
         $dispatched = 0;
 
         // Process daily digests
@@ -37,17 +37,26 @@ class DispatchDueDigestsCommand extends Command
         Digest::query()
             ->where('is_enabled', true)
             ->where('frequency', 'daily')
-            ->where(function (Builder $query) use ($now) {
-                // Either never run, or last run was before today (in any timezone, rough filter)
-                $query->whereNull('last_successful_run_at')
-                    ->orWhere('last_successful_run_at', '<', $now->copy()->subDay());
-            })
             ->each(function (Digest $digest) use ($now, &$dispatched) {
-                if ($this->isWithinSendTimeWindow($digest, $now) && ! $this->hasRunToday($digest, $now)) {
-                    ProcessDigestRunJob::dispatch($digest);
-                    $dispatched++;
-                    $this->line("Dispatched daily: {$digest->name} (ID: {$digest->id})");
+                $nowInTimezone = $this->nowInDigestTimezone($digest, $now);
+
+                if (! $this->isWithinSendTimeWindow($digest, $nowInTimezone)) {
+                    return;
                 }
+
+                if ($this->hasDispatchedToday($digest, $nowInTimezone)) {
+                    return;
+                }
+
+                $dayStartUtc = $nowInTimezone->copy()->startOfDay()->setTimezone('UTC');
+
+                if (! $this->markAsDispatched($digest, $dayStartUtc, $now)) {
+                    return;
+                }
+
+                ProcessDigestRunJob::dispatch($digest);
+                $dispatched++;
+                $this->line("Dispatched daily: {$digest->name} (ID: {$digest->id})");
             });
 
         return $dispatched;
@@ -65,17 +74,30 @@ class DispatchDueDigestsCommand extends Command
             ->where('is_enabled', true)
             ->where('frequency', 'weekly')
             ->whereIn('send_day_of_week', $possibleDays)
-            ->where(function (Builder $query) use ($now) {
-                // Either never run, or last run was more than 6 days ago (rough filter)
-                $query->whereNull('last_successful_run_at')
-                    ->orWhere('last_successful_run_at', '<', $now->copy()->subDays(6));
-            })
             ->each(function (Digest $digest) use ($now, &$dispatched) {
-                if ($this->isWithinSendTimeWindow($digest, $now) && $this->isCorrectDayOfWeek($digest, $now) && ! $this->hasRunThisWeek($digest, $now)) {
-                    ProcessDigestRunJob::dispatch($digest);
-                    $dispatched++;
-                    $this->line("Dispatched weekly: {$digest->name} (ID: {$digest->id})");
+                $nowInTimezone = $this->nowInDigestTimezone($digest, $now);
+
+                if (! $this->isWithinSendTimeWindow($digest, $nowInTimezone)) {
+                    return;
                 }
+
+                if (! $this->isCorrectDayOfWeek($digest, $nowInTimezone)) {
+                    return;
+                }
+
+                if ($this->hasDispatchedThisWeek($digest, $nowInTimezone)) {
+                    return;
+                }
+
+                $weekStartUtc = $nowInTimezone->copy()->startOfWeek(Carbon::SUNDAY)->setTimezone('UTC');
+
+                if (! $this->markAsDispatched($digest, $weekStartUtc, $now)) {
+                    return;
+                }
+
+                ProcessDigestRunJob::dispatch($digest);
+                $dispatched++;
+                $this->line("Dispatched weekly: {$digest->name} (ID: {$digest->id})");
             });
 
         return $dispatched;
@@ -99,57 +121,118 @@ class DispatchDueDigestsCommand extends Command
         return array_unique($days);
     }
 
-    private function isWithinSendTimeWindow(Digest $digest, Carbon $now): bool
+    private function isWithinSendTimeWindow(Digest $digest, Carbon $nowInTimezone): bool
     {
-        $timezone = $digest->timezone ?? 'UTC';
-        $nowInTimezone = $now->copy()->setTimezone($timezone);
+        $sendDateTime = $this->sendDateTime($digest, $nowInTimezone);
 
-        $sendDateTime = \DateTime::createFromFormat('H:i:s', $digest->send_time, new \DateTimeZone($timezone));
-        $currentDateTime = \DateTime::createFromFormat('H:i', $nowInTimezone->format('H:i'), new \DateTimeZone($timezone));
-
-        if (! $sendDateTime || ! $currentDateTime) {
+        if (! $sendDateTime) {
             return false;
         }
 
-        $diffMinutes = abs(($currentDateTime->getTimestamp() - $sendDateTime->getTimestamp()) / 60);
+        $diffMinutes = $sendDateTime->diffInMinutes($nowInTimezone, false);
 
-        return $diffMinutes <= 5;
+        return $diffMinutes >= 0 && $diffMinutes <= 5;
     }
 
-    private function isCorrectDayOfWeek(Digest $digest, Carbon $now): bool
+    private function isCorrectDayOfWeek(Digest $digest, Carbon $nowInTimezone): bool
     {
-        $timezone = $digest->timezone ?? 'UTC';
-        $nowInTimezone = $now->copy()->setTimezone($timezone);
         $currentDayOfWeek = (int) $nowInTimezone->format('w');
 
         return $digest->send_day_of_week === $currentDayOfWeek;
     }
 
-    private function hasRunToday(Digest $digest, Carbon $now): bool
+    private function hasDispatchedToday(Digest $digest, Carbon $nowInTimezone): bool
     {
-        if (! $digest->last_successful_run_at) {
+        $lastDispatch = $this->lastDispatchReference($digest);
+
+        if (! $lastDispatch) {
             return false;
         }
 
         $timezone = $digest->timezone ?? 'UTC';
-        $nowInTimezone = $now->copy()->setTimezone($timezone);
-        $lastRunInTimezone = $digest->last_successful_run_at->copy()->setTimezone($timezone);
+        $lastRunInTimezone = $lastDispatch->copy()->setTimezone($timezone);
 
         return $lastRunInTimezone->format('Y-m-d') === $nowInTimezone->format('Y-m-d');
     }
 
-    private function hasRunThisWeek(Digest $digest, Carbon $now): bool
+    private function hasDispatchedThisWeek(Digest $digest, Carbon $nowInTimezone): bool
     {
-        if (! $digest->last_successful_run_at) {
+        $lastDispatch = $this->lastDispatchReference($digest);
+
+        if (! $lastDispatch) {
             return false;
         }
 
         $timezone = $digest->timezone ?? 'UTC';
-        $nowInTimezone = $now->copy()->setTimezone($timezone);
-        $lastRunInTimezone = $digest->last_successful_run_at->copy()->setTimezone($timezone);
+        $lastRunInTimezone = $lastDispatch->copy()->setTimezone($timezone);
 
-        $daysSinceLastRun = $nowInTimezone->diffInDays($lastRunInTimezone);
+        $weekStart = $nowInTimezone->copy()->startOfWeek(Carbon::SUNDAY);
+        $lastWeekStart = $lastRunInTimezone->copy()->startOfWeek(Carbon::SUNDAY);
 
-        return $daysSinceLastRun < 6;
+        return $weekStart->isSameDay($lastWeekStart);
+    }
+
+    private function nowInDigestTimezone(Digest $digest, Carbon $now): Carbon
+    {
+        $timezone = $digest->timezone ?? 'UTC';
+
+        return $now->copy()->setTimezone($timezone);
+    }
+
+    private function sendDateTime(Digest $digest, Carbon $nowInTimezone): ?Carbon
+    {
+        $sendTime = $this->normalizeSendTime($digest->send_time);
+
+        if (! $sendTime) {
+            return null;
+        }
+
+        return $nowInTimezone->copy()->setTimeFromTimeString($sendTime);
+    }
+
+    private function normalizeSendTime(?string $sendTime): ?string
+    {
+        if (! $sendTime) {
+            return null;
+        }
+
+        if (preg_match('/^\d{2}:\d{2}$/', $sendTime) === 1) {
+            return $sendTime.':00';
+        }
+
+        if (preg_match('/^\d{2}:\d{2}:\d{2}$/', $sendTime) === 1) {
+            return $sendTime;
+        }
+
+        $parsed = \DateTime::createFromFormat('H:i:s', $sendTime)
+            ?: \DateTime::createFromFormat('H:i', $sendTime);
+
+        if (! $parsed) {
+            return null;
+        }
+
+        return $parsed->format('H:i:s');
+    }
+
+    private function lastDispatchReference(Digest $digest): ?Carbon
+    {
+        $reference = $digest->last_dispatched_at ?? $digest->last_successful_run_at;
+
+        if (! $reference) {
+            return null;
+        }
+
+        return Carbon::instance($reference);
+    }
+
+    private function markAsDispatched(Digest $digest, Carbon $periodStartUtc, Carbon $now): bool
+    {
+        return Digest::query()
+            ->whereKey($digest->id)
+            ->where(function (Builder $query) use ($periodStartUtc) {
+                $query->whereNull('last_dispatched_at')
+                    ->orWhere('last_dispatched_at', '<', $periodStartUtc);
+            })
+            ->update(['last_dispatched_at' => $now]) === 1;
     }
 }

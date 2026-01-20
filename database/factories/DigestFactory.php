@@ -26,6 +26,7 @@ class DigestFactory extends Factory
             'send_day_of_week' => null,
             'is_enabled' => true,
             'last_successful_run_at' => null,
+            'last_dispatched_at' => null,
             'ai_enabled' => true,
             'ai_prefs' => null,
         ];
