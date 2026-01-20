@@ -28,10 +28,8 @@ class GitHubRepoExists implements ValidationRule
             $parsed = GitHubRepoUrl::parse($value);
             $repoName = $parsed ? "{$parsed['owner']}/{$parsed['repo']}" : $value;
 
-            $message = $result['error']
-                ?? "The repository '{$repoName}' does not exist or is private.";
-
-            $fail($message);
+            // Always show user-friendly message, even for API errors (rate limit, etc.)
+            $fail("The repository '{$repoName}' does not exist or is private.");
         }
     }
 }
