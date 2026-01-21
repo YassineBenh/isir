@@ -4,12 +4,17 @@ import {
     ArrowLeft,
     Calendar,
     CheckCircle2,
+    ChevronDown,
     Clock,
+    ExternalLink,
+    FileText,
     Loader2,
     Mail,
     MessageSquare,
     Slack,
+    Sparkles,
 } from 'lucide-react';
+import { useState } from 'react';
 import Markdown from 'react-markdown';
 
 import DigestController from '@/actions/App/Http/Controllers/DigestController';
@@ -17,6 +22,11 @@ import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
     Empty,
     EmptyDescription,
@@ -32,6 +42,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Tooltip,
     TooltipContent,
@@ -46,6 +57,8 @@ import {
     type Digest,
     type DigestRun,
     type DigestRunStatus,
+    type Source,
+    type SourceItem,
 } from '@/types';
 
 const destinationIcons: Record<DestinationType, typeof Slack> = {
@@ -100,6 +113,9 @@ export default function DigestRunShow({ digest, run }: Props) {
 
     const status = runStatusConfig[run.status];
     const StatusIcon = status.icon;
+
+    // Group source items by their source
+    const itemsBySource = groupItemsBySource(run.source_items ?? []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -274,34 +290,247 @@ export default function DigestRunShow({ digest, run }: Props) {
                     </Card>
                 )}
 
-                {/* Rendered Content */}
+                {/* Content Tabs */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Content</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {run.rendered_content ? (
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
-                                <Markdown>{run.rendered_content}</Markdown>
-                            </div>
-                        ) : (
-                            <Empty>
-                                <EmptyHeader>
-                                    <EmptyMedia variant="icon">
-                                        <AlertCircle />
-                                    </EmptyMedia>
-                                    <EmptyTitle>No content</EmptyTitle>
-                                    <EmptyDescription>
-                                        This run has no rendered content yet.
-                                    </EmptyDescription>
-                                </EmptyHeader>
-                            </Empty>
-                        )}
+                        <Tabs defaultValue="rendered">
+                            <TabsList>
+                                <TabsTrigger value="rendered">
+                                    <Sparkles className="size-4" />
+                                    Rendered
+                                </TabsTrigger>
+                                <TabsTrigger value="original">
+                                    <FileText className="size-4" />
+                                    Original
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="rendered" className="mt-4">
+                                {run.rendered_content ? (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                        <Markdown>
+                                            {run.rendered_content}
+                                        </Markdown>
+                                    </div>
+                                ) : (
+                                    <Empty>
+                                        <EmptyHeader>
+                                            <EmptyMedia variant="icon">
+                                                <Sparkles />
+                                            </EmptyMedia>
+                                            <EmptyTitle>
+                                                No rendered content
+                                            </EmptyTitle>
+                                            <EmptyDescription>
+                                                AI-generated content will appear
+                                                here once the digest is
+                                                processed.
+                                            </EmptyDescription>
+                                        </EmptyHeader>
+                                    </Empty>
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="original" className="mt-4">
+                                {itemsBySource.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {itemsBySource.map(
+                                            ({ source, items }) => (
+                                                <SourceCard
+                                                    key={source.id}
+                                                    source={source}
+                                                    items={items}
+                                                    digestId={digest.id}
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                ) : (
+                                    <Empty>
+                                        <EmptyHeader>
+                                            <EmptyMedia variant="icon">
+                                                <FileText />
+                                            </EmptyMedia>
+                                            <EmptyTitle>
+                                                No source items
+                                            </EmptyTitle>
+                                            <EmptyDescription>
+                                                No items were collected for this
+                                                digest run.
+                                            </EmptyDescription>
+                                        </EmptyHeader>
+                                    </Empty>
+                                )}
+                            </TabsContent>
+                        </Tabs>
                     </CardContent>
                 </Card>
             </div>
         </AppLayout>
     );
+}
+
+interface SourceCardProps {
+    source: Source;
+    items: SourceItem[];
+    digestId: number;
+}
+
+function SourceCard({ source, items, digestId }: SourceCardProps) {
+    return (
+        <div className="rounded-lg border bg-card">
+            <div className="flex items-center justify-between border-b px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <div className="flex size-8 items-center justify-center rounded-md bg-muted">
+                        <FileText className="size-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-medium">{source.name}</h3>
+                        <p className="text-xs text-muted-foreground">
+                            {items.length} item{items.length !== 1 ? 's' : ''}
+                        </p>
+                    </div>
+                </div>
+                {source.url && (
+                    <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                        <ExternalLink className="size-4" />
+                    </a>
+                )}
+            </div>
+            <div className="divide-y">
+                {items.map((item) => (
+                    <SourceItemRow
+                        key={item.id}
+                        item={item}
+                        digestId={digestId}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+interface SourceItemRowProps {
+    item: SourceItem;
+    digestId: number;
+}
+
+function SourceItemRow({ item, digestId }: SourceItemRowProps) {
+    const [isOpen, setIsOpen] = useState(true);
+
+    // Find the summary for this digest
+    const summary = item.summaries?.find((s) => s.digest_id === digestId);
+
+    return (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <div className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                            {item.url ? (
+                                <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium hover:underline"
+                                >
+                                    {item.title}
+                                </a>
+                            ) : (
+                                <span className="text-sm font-medium">
+                                    {item.title}
+                                </span>
+                            )}
+                            {item.url && (
+                                <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+                            )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                            {formatDateTime(item.published_at)}
+                        </p>
+
+                        {/* AI Summary */}
+                        {summary?.summary_markdown && (
+                            <div className="mt-2 rounded-md bg-muted/50 p-2">
+                                <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                                    <Sparkles className="size-3" />
+                                    AI Summary
+                                </div>
+                                <div className="prose prose-sm dark:prose-invert prose-p:my-0 max-w-none text-sm">
+                                    <Markdown>
+                                        {summary.summary_markdown}
+                                    </Markdown>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {item.raw_content && (
+                        <CollapsibleTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="shrink-0"
+                            >
+                                <ChevronDown
+                                    className={`size-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                                />
+                                <span className="sr-only">
+                                    {isOpen ? 'Hide' : 'Show'} original content
+                                </span>
+                            </Button>
+                        </CollapsibleTrigger>
+                    )}
+                </div>
+
+                <CollapsibleContent>
+                    {item.raw_content && (
+                        <div className="mt-3 rounded-md border bg-muted/30 p-3">
+                            <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                Original Content
+                            </p>
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                <Markdown>{item.raw_content}</Markdown>
+                            </div>
+                        </div>
+                    )}
+                </CollapsibleContent>
+            </div>
+        </Collapsible>
+    );
+}
+
+function groupItemsBySource(
+    items: SourceItem[],
+): { source: Source; items: SourceItem[] }[] {
+    const sourceMap = new Map<
+        number,
+        { source: Source; items: SourceItem[] }
+    >();
+
+    for (const item of items) {
+        if (!item.source) continue;
+
+        const existing = sourceMap.get(item.source.id);
+        if (existing) {
+            existing.items.push(item);
+        } else {
+            sourceMap.set(item.source.id, {
+                source: item.source,
+                items: [item],
+            });
+        }
+    }
+
+    return Array.from(sourceMap.values());
 }
 
 function formatDate(dateString: string): string {

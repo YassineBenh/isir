@@ -19,7 +19,11 @@ class DigestRunController extends Controller
     {
         $this->authorize('view', $run);
 
-        $run->load(['deliveryAttempts.destination', 'sourceItems.source']);
+        $run->load([
+            'deliveryAttempts.destination',
+            'sourceItems.source',
+            'sourceItems.summaries' => fn ($query) => $query->where('digest_id', $digest->id),
+        ]);
 
         return Inertia::render('digests/runs/show', [
             'digest' => $digest,

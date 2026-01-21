@@ -103,6 +103,26 @@ export type DigestRunStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 export type DeliveryAttemptStatus = 'pending' | 'sent' | 'failed';
 
+export type DigestItemSummaryStatus =
+    | 'pending'
+    | 'processing'
+    | 'completed'
+    | 'failed';
+
+export interface DigestItemSummary {
+    id: number;
+    digest_id: number;
+    source_item_id: number;
+    summary_markdown: string | null;
+    summary_json: Record<string, unknown> | null;
+    provider: string | null;
+    model: string | null;
+    status: DigestItemSummaryStatus;
+    error: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface SourceItem {
     id: number;
     source_id: number;
@@ -115,6 +135,7 @@ export interface SourceItem {
     created_at: string;
     updated_at: string;
     source?: Source;
+    summaries?: DigestItemSummary[];
     pivot?: {
         position: number;
     };

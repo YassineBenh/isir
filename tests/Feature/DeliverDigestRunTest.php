@@ -17,7 +17,7 @@ beforeEach(function () {
 });
 
 describe('delivery includes run URL', function () {
-    it('prepends run URL to slack messages', function () {
+    it('sends slack message with link only', function () {
         Http::fake(['*' => Http::response('ok', 200)]);
 
         $destination = Destination::factory()->slack()->create(['user_id' => $this->user->id]);
@@ -30,13 +30,13 @@ describe('delivery includes run URL', function () {
             $text = $request->data()['text'] ?? '';
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
 
-            return str_contains($text, 'View this digest online:')
+            return str_contains($text, 'is now available')
                 && str_contains($text, $expectedUrl)
-                && str_contains($text, '# Release Notes');
+                && ! str_contains($text, '# Release Notes');
         });
     });
 
-    it('prepends run URL to discord messages', function () {
+    it('sends discord message with link only', function () {
         Http::fake(['*' => Http::response(['id' => '123'], 200)]);
 
         $destination = Destination::factory()->discord()->create(['user_id' => $this->user->id]);
@@ -49,8 +49,9 @@ describe('delivery includes run URL', function () {
             $content = $request->data()['content'] ?? '';
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
 
-            return str_contains($content, 'View this digest online:')
-                && str_contains($content, $expectedUrl);
+            return str_contains($content, 'is now available')
+                && str_contains($content, $expectedUrl)
+                && ! str_contains($content, '# Release Notes');
         });
     });
 

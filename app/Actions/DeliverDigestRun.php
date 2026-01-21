@@ -122,7 +122,7 @@ class DeliverDigestRun
 
         $digest = $digestRun->digest;
         $url = $this->getRunUrl($digestRun);
-        $content = "View this digest online: {$url}\n\n".$digestRun->rendered_content;
+        $content = "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
 
         Mail::raw($content, function ($message) use ($email, $digest) {
             $message->to($email)
@@ -134,24 +134,17 @@ class DeliverDigestRun
 
     private function formatForSlack(DigestRun $digestRun): string
     {
+        $digest = $digestRun->digest;
         $url = $this->getRunUrl($digestRun);
 
-        // Slack uses mrkdwn, which is close to markdown
-        // In the future, this could be enhanced with Slack Block Kit
-        return "View this digest online: {$url}\n\n".$digestRun->rendered_content;
+        return "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
     }
 
     private function formatForDiscord(DigestRun $digestRun): string
     {
+        $digest = $digestRun->digest;
         $url = $this->getRunUrl($digestRun);
-        $header = "View this digest online: {$url}\n\n";
-        $content = $header.$digestRun->rendered_content;
 
-        // Discord has a 2000 character limit for regular messages
-        if (strlen($content) > 2000) {
-            $content = substr($content, 0, 1997).'...';
-        }
-
-        return $content;
+        return "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
     }
 }
