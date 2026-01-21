@@ -290,86 +290,104 @@ export default function DigestRunShow({ digest, run }: Props) {
                     </Card>
                 )}
 
-                {/* Content Tabs */}
+                {/* Content */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Content</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <Tabs defaultValue="rendered">
-                            <TabsList>
-                                <TabsTrigger value="rendered">
-                                    <Sparkles className="size-4" />
-                                    Rendered
-                                </TabsTrigger>
-                                <TabsTrigger value="original">
-                                    <FileText className="size-4" />
-                                    Original
-                                </TabsTrigger>
-                            </TabsList>
+                        {digest.ai_enabled ? (
+                            <Tabs defaultValue="rendered">
+                                <TabsList>
+                                    <TabsTrigger value="rendered">
+                                        <Sparkles className="size-4" />
+                                        Rendered
+                                    </TabsTrigger>
+                                    <TabsTrigger value="original">
+                                        <FileText className="size-4" />
+                                        Original
+                                    </TabsTrigger>
+                                </TabsList>
 
-                            <TabsContent value="rendered" className="mt-4">
-                                {run.rendered_content ? (
-                                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                                        <Markdown>
-                                            {run.rendered_content}
-                                        </Markdown>
-                                    </div>
-                                ) : (
-                                    <Empty>
-                                        <EmptyHeader>
-                                            <EmptyMedia variant="icon">
-                                                <Sparkles />
-                                            </EmptyMedia>
-                                            <EmptyTitle>
-                                                No rendered content
-                                            </EmptyTitle>
-                                            <EmptyDescription>
-                                                AI-generated content will appear
-                                                here once the digest is
-                                                processed.
-                                            </EmptyDescription>
-                                        </EmptyHeader>
-                                    </Empty>
-                                )}
-                            </TabsContent>
+                                <TabsContent value="rendered" className="mt-4">
+                                    {run.rendered_content ? (
+                                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                                            <Markdown>
+                                                {run.rendered_content}
+                                            </Markdown>
+                                        </div>
+                                    ) : (
+                                        <Empty>
+                                            <EmptyHeader>
+                                                <EmptyMedia variant="icon">
+                                                    <Sparkles />
+                                                </EmptyMedia>
+                                                <EmptyTitle>
+                                                    No rendered content
+                                                </EmptyTitle>
+                                                <EmptyDescription>
+                                                    AI-generated content will
+                                                    appear here once the digest
+                                                    is processed.
+                                                </EmptyDescription>
+                                            </EmptyHeader>
+                                        </Empty>
+                                    )}
+                                </TabsContent>
 
-                            <TabsContent value="original" className="mt-4">
-                                {itemsBySource.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {itemsBySource.map(
-                                            ({ source, items }) => (
-                                                <SourceCard
-                                                    key={source.id}
-                                                    source={source}
-                                                    items={items}
-                                                    digestId={digest.id}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
-                                ) : (
-                                    <Empty>
-                                        <EmptyHeader>
-                                            <EmptyMedia variant="icon">
-                                                <FileText />
-                                            </EmptyMedia>
-                                            <EmptyTitle>
-                                                No source items
-                                            </EmptyTitle>
-                                            <EmptyDescription>
-                                                No items were collected for this
-                                                digest run.
-                                            </EmptyDescription>
-                                        </EmptyHeader>
-                                    </Empty>
-                                )}
-                            </TabsContent>
-                        </Tabs>
+                                <TabsContent value="original" className="mt-4">
+                                    <OriginalContent
+                                        itemsBySource={itemsBySource}
+                                        digestId={digest.id}
+                                    />
+                                </TabsContent>
+                            </Tabs>
+                        ) : (
+                            <OriginalContent
+                                itemsBySource={itemsBySource}
+                                digestId={digest.id}
+                            />
+                        )}
                     </CardContent>
                 </Card>
             </div>
         </AppLayout>
+    );
+}
+
+interface OriginalContentProps {
+    itemsBySource: { source: Source; items: SourceItem[] }[];
+    digestId: number;
+}
+
+function OriginalContent({ itemsBySource, digestId }: OriginalContentProps) {
+    if (itemsBySource.length === 0) {
+        return (
+            <Empty>
+                <EmptyHeader>
+                    <EmptyMedia variant="icon">
+                        <FileText />
+                    </EmptyMedia>
+                    <EmptyTitle>No source items</EmptyTitle>
+                    <EmptyDescription>
+                        No items were collected for this digest run.
+                    </EmptyDescription>
+                </EmptyHeader>
+            </Empty>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            {itemsBySource.map(({ source, items }) => (
+                <SourceCard
+                    key={source.id}
+                    source={source}
+                    items={items}
+                    digestId={digestId}
+                />
+            ))}
+        </div>
     );
 }
 
