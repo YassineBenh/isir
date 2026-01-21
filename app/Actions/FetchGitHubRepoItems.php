@@ -8,6 +8,7 @@ use App\Models\SourceItem;
 use App\Services\GitHubService;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class FetchGitHubRepoItems
 {
@@ -29,8 +30,19 @@ class FetchGitHubRepoItems
         $owner = $source->config['owner'];
         $repo = $source->config['repo'];
 
+        Log::info("FetchGitHubRepoItems: Fetching releases for {$owner}/{$repo}", [
+            'source_id' => $source->id,
+            'last_fetched_at' => $source->last_fetched_at?->toDateTimeString(),
+        ]);
+
         try {
             $releases = $this->fetchReleases($owner, $repo, $source);
+
+            Log::info('FetchGitHubRepoItems: Found releases to process', [
+                'source_id' => $source->id,
+                'count' => count($releases),
+            ]);
+
             $newItems = $this->storeReleases($source, $releases);
 
             $source->update([
@@ -113,6 +125,12 @@ class FetchGitHubRepoItems
             );
 
             if ($item->wasRecentlyCreated) {
+                Log::info('FetchGitHubRepoItems: Stored new release', [
+                    'source_id' => $source->id,
+                    'item_id' => $item->id,
+                    'title' => $item->title,
+                    'published_at' => $item->published_at?->toDateTimeString(),
+                ]);
                 $newItems->push($item);
             }
         }
