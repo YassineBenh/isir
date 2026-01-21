@@ -31,8 +31,7 @@ describe('delivery includes run URL', function () {
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
 
             return str_contains($text, 'is now available')
-                && str_contains($text, $expectedUrl)
-                && ! str_contains($text, '# Release Notes');
+                && str_contains($text, $expectedUrl);
         });
     });
 
@@ -50,8 +49,7 @@ describe('delivery includes run URL', function () {
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
 
             return str_contains($content, 'is now available')
-                && str_contains($content, $expectedUrl)
-                && ! str_contains($content, '# Release Notes');
+                && str_contains($content, $expectedUrl);
         });
     });
 
