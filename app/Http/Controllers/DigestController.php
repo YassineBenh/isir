@@ -38,6 +38,25 @@ class DigestController extends Controller
     }
 
     /**
+     * Display the specified digest and its runs.
+     */
+    public function show(Request $request, Digest $digest): Response
+    {
+        $this->authorize('view', $digest);
+
+        $digest->load(['sources', 'destinations']);
+
+        $runs = $digest->runs()
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('digests/show', [
+            'digest' => $digest,
+            'runs' => $runs,
+        ]);
+    }
+
+    /**
      * Show the form for creating a new digest.
      */
     public function create(Request $request): Response

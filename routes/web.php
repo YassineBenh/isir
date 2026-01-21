@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DigestController;
+use App\Http\Controllers\DigestRunController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -18,9 +19,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // Digests
-    Route::resource('digests', DigestController::class)->except(['show']);
+    Route::resource('digests', DigestController::class);
     Route::patch('digests/{digest}/toggle', [DigestController::class, 'toggle'])
         ->name('digests.toggle');
+    Route::get('digests/{digest}/runs/{run}', [DigestRunController::class, 'show'])
+        ->name('digests.runs.show');
 
     // Destinations
     Route::resource('destinations', DestinationController::class)->except(['show']);

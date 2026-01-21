@@ -98,3 +98,69 @@ export interface DestinationsByType {
     discord?: Destination[];
     email?: Destination[];
 }
+
+export type DigestRunStatus = 'pending' | 'running' | 'completed' | 'failed';
+
+export type DeliveryAttemptStatus = 'pending' | 'sent' | 'failed';
+
+export interface SourceItem {
+    id: number;
+    source_id: number;
+    external_id: string;
+    title: string;
+    url: string | null;
+    published_at: string;
+    raw_content: string | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+    updated_at: string;
+    source?: Source;
+    pivot?: {
+        position: number;
+    };
+}
+
+export interface DeliveryAttempt {
+    id: number;
+    digest_run_id: number;
+    destination_id: number;
+    status: DeliveryAttemptStatus;
+    sent_at: string | null;
+    provider_message_id: string | null;
+    error: string | null;
+    created_at: string;
+    updated_at: string;
+    destination?: Destination;
+}
+
+export interface DigestRun {
+    id: number;
+    digest_id: number;
+    period_start_at: string;
+    period_end_at: string;
+    status: DigestRunStatus;
+    rendered_content: string | null;
+    started_at: string | null;
+    finished_at: string | null;
+    error: string | null;
+    created_at: string;
+    updated_at: string;
+    digest?: Digest;
+    source_items?: SourceItem[];
+    delivery_attempts?: DeliveryAttempt[];
+}
+
+export interface PaginatedData<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    links: {
+        url: string | null;
+        label: string;
+        active: boolean;
+    }[];
+}

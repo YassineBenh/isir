@@ -25,6 +25,14 @@ class DeliverDigestRun
         }
     }
 
+    /**
+     * Get the URL to view this digest run online.
+     */
+    private function getRunUrl(DigestRun $digestRun): string
+    {
+        return route('digests.runs.show', [$digestRun->digest, $digestRun]);
+    }
+
     private function deliverToDestination(DigestRun $digestRun, Destination $destination): void
     {
         $attempt = $digestRun->deliveryAttempts()->create([
@@ -113,8 +121,10 @@ class DeliverDigestRun
         }
 
         $digest = $digestRun->digest;
+        $url = $this->getRunUrl($digestRun);
+        $content = "View this digest online: {$url}\n\n".$digestRun->rendered_content;
 
-        Mail::raw($digestRun->rendered_content, function ($message) use ($email, $digest) {
+        Mail::raw($content, function ($message) use ($email, $digest) {
             $message->to($email)
                 ->subject("{$digest->name} - Digest Update");
         });
@@ -124,15 +134,18 @@ class DeliverDigestRun
 
     private function formatForSlack(DigestRun $digestRun): string
     {
+        $url = $this->getRunUrl($digestRun);
+
         // Slack uses mrkdwn, which is close to markdown
-        // For now, we'll just use the rendered content directly
         // In the future, this could be enhanced with Slack Block Kit
-        return $digestRun->rendered_content;
+        return "View this digest online: {$url}\n\n".$digestRun->rendered_content;
     }
 
     private function formatForDiscord(DigestRun $digestRun): string
     {
-        $content = $digestRun->rendered_content;
+        $url = $this->getRunUrl($digestRun);
+        $header = "View this digest online: {$url}\n\n";
+        $content = $header.$digestRun->rendered_content;
 
         // Discord has a 2000 character limit for regular messages
         if (strlen($content) > 2000) {

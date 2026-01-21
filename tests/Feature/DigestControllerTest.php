@@ -16,6 +16,70 @@ beforeEach(function () {
     });
 });
 
+describe('show', function () {
+    it('displays digest show page with runs', function () {
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+        $source = Source::factory()->create();
+        $destination = Destination::factory()->create(['user_id' => $this->user->id]);
+        $digest->sources()->attach($source);
+        $digest->destinations()->attach($destination);
+
+        $runs = \App\Models\DigestRun::factory(3)->create(['digest_id' => $digest->id]);
+
+        $response = $this->actingAs($this->user)->get("/digests/{$digest->id}");
+
+        $response->assertSuccessful();
+        $response->assertInertia(fn ($page) => $page
+            ->component('digests/show')
+            ->has('digest')
+            ->has('runs.data', 3)
+            ->where('digest.id', $digest->id)
+        );
+    });
+
+    it('loads sources and destinations', function () {
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+        $sources = Source::factory(2)->create();
+        $destinations = Destination::factory(2)->create(['user_id' => $this->user->id]);
+        $digest->sources()->attach($sources);
+        $digest->destinations()->attach($destinations);
+
+        $response = $this->actingAs($this->user)->get("/digests/{$digest->id}");
+
+        $response->assertInertia(fn ($page) => $page
+            ->has('digest.sources', 2)
+            ->has('digest.destinations', 2)
+        );
+    });
+
+    it('prevents viewing another users digest', function () {
+        $otherDigest = Digest::factory()->create();
+
+        $response = $this->actingAs($this->user)->get("/digests/{$otherDigest->id}");
+
+        $response->assertForbidden();
+    });
+
+    it('requires authentication', function () {
+        $digest = Digest::factory()->create();
+
+        $this->get("/digests/{$digest->id}")->assertRedirect('/login');
+    });
+
+    it('paginates runs', function () {
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+        \App\Models\DigestRun::factory(15)->create(['digest_id' => $digest->id]);
+
+        $response = $this->actingAs($this->user)->get("/digests/{$digest->id}");
+
+        $response->assertInertia(fn ($page) => $page
+            ->has('runs.data', 10)
+            ->where('runs.total', 15)
+            ->where('runs.last_page', 2)
+        );
+    });
+});
+
 describe('index', function () {
     it('displays digests index page', function () {
         $digests = Digest::factory(3)->create(['user_id' => $this->user->id]);

@@ -85,7 +85,12 @@ export function DigestCard({ digest }: DigestCardProps) {
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="space-y-1">
                     <CardTitle className="flex items-center gap-1.5 text-base">
-                        {digest.name}
+                        <Link
+                            href={DigestController.show(digest).url}
+                            className="hover:underline"
+                        >
+                            {digest.name}
+                        </Link>
                         {digest.ai_enabled && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
