@@ -9,6 +9,8 @@ use Illuminate\Console\Command;
 
 class FetchSourcesCommand extends Command
 {
+    private const BATCH_SIZE = 100;
+
     protected $signature = 'sources:fetch {--type= : The source type to fetch (github_repo, rss_feed, youtube_channel)}';
 
     protected $description = 'Dispatch jobs to fetch items from sources';
@@ -39,9 +41,15 @@ class FetchSourcesCommand extends Command
             $query->where('type', $type);
         }
 
+        $sources = $query
+            ->orderByRaw('last_fetched_at is null desc')
+            ->orderBy('last_fetched_at')
+            ->limit(self::BATCH_SIZE)
+            ->get();
+
         $dispatched = 0;
 
-        $query->each(function (Source $source) use (&$dispatched) {
+        $sources->each(function (Source $source) use (&$dispatched) {
             $this->dispatchForSource($source);
             $dispatched++;
         });
