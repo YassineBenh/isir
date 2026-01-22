@@ -1,5 +1,6 @@
 /.php-cs-fixer.cache
 /.phpunit.cache
+/database/data/*.sqlite
 /bootstrap/ssr
 /node_modules
 /public/build
