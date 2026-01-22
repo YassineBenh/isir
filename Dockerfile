@@ -6,8 +6,6 @@ FROM serversideup/php:8.5-fpm-nginx AS base
 
 USER root
 
-RUN install-php-extensions exif intl
-
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh && \
     bash /tmp/nodesource_setup.sh && \
     apt-get install -y nodejs=22.* && \
