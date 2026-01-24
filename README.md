@@ -1,5 +1,7 @@
 # ISIR
 
+[![GitHub Release](https://img.shields.io/github/v/release/yassinebenh/isir)](https://github.com/yassinebenh/isir/releases/latest)
+
 **It's Short; I Read** — an open-source digest aggregator that monitors GitHub repositories for new releases and delivers scheduled summaries to Slack, Discord, or Email. Self-hostable and AI-ready.
 
 ## Installation
