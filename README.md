@@ -1,5 +1,7 @@
 # ISIR
 
+**It's Short; I Read** — an open-source digest aggregator that monitors GitHub repositories for new releases and delivers scheduled summaries to Slack, Discord, or Email. Self-hostable and AI-ready.
+
 ## Installation
 
 ### Docker Compose (Recommended)
