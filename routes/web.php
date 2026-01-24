@@ -4,17 +4,9 @@ use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DigestController;
 use App\Http\Controllers\DigestRunController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
-
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
+    Route::get('/', \App\Http\Controllers\DashboardController::class)->name('dashboard');
 
     // Digests
     Route::resource('digests', DigestController::class);
