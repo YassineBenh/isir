@@ -17,12 +17,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create test user
+        // Create test user with admin role
         $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('test@example.com'),
         ]);
+        $user->assignRole('admin');
 
         // Create GitHub repo sources
         $coolify = Source::create([

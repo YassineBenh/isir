@@ -1,18 +1,19 @@
-import { Link } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { type PropsWithChildren, useMemo } from 'react';
 
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useActiveUrl } from '@/hooks/use-active-url';
 import { cn, toUrl } from '@/lib/utils';
+import { edit as editAdmin } from '@/routes/admin';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
-import { type NavItem } from '@/types';
+import { type NavItem, type SharedData } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+const baseSidebarNavItems: NavItem[] = [
     {
         title: 'Profile',
         href: edit(),
@@ -35,8 +36,22 @@ const sidebarNavItems: NavItem[] = [
     },
 ];
 
+const adminNavItem: NavItem = {
+    title: 'Admin',
+    href: editAdmin(),
+    icon: null,
+};
+
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { urlIsActive } = useActiveUrl();
+    const { auth } = usePage<SharedData>().props;
+
+    const sidebarNavItems = useMemo(() => {
+        if (auth.isAdmin) {
+            return [...baseSidebarNavItems, adminNavItem];
+        }
+        return baseSidebarNavItems;
+    }, [auth.isAdmin]);
 
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {
