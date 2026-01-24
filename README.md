@@ -17,7 +17,7 @@ services:
             APP_URL: 'https://your-domain.com'
             # GITHUB_TOKEN: ''  # Optional: Increases rate limit (60 → 5000 req/hr)
             # AI_PROVIDER: ''   # Optional: anthropic, openai, ollama, gemini, mistral, groq
-            # AI_MODEL: ''      # Optional: Model name (e.g., claude-sonnet-4-20250514, gpt-4o)
+            # AI_MODEL: ''      # Optional: Model name (e.g., gpt-5-mini, claude-sonnet-4-20250514)
             # AI_API_KEY: ''    # Optional: API key for the AI provider
         volumes:
             - isir_data:/var/www/html/storage
@@ -36,7 +36,7 @@ volumes:
 To enable AI-generated summaries for your digests, configure these environment variables:
 
 - `AI_PROVIDER` — The AI provider to use: `anthropic`, `openai`, `ollama`, `gemini`, `mistral`, or `groq`.
-- `AI_MODEL` — The model name (e.g., `claude-sonnet-4-20250514` for Anthropic, `gpt-4o` for OpenAI).
+- `AI_MODEL` — The model name (e.g., `gpt-5-mini` for OpenAI, `claude-sonnet-4-20250514` for Anthropic).
 - `AI_API_KEY` — Your API key for the chosen provider.
 
 All three variables must be set for AI summaries to work. When not configured, the AI summary feature will be disabled in the UI.
@@ -54,8 +54,8 @@ docker run -d \
   -p 8080:8080 \
   -e APP_URL=https://your-domain.com \
   -e GITHUB_TOKEN=your_token_here \
-  -e AI_PROVIDER=anthropic \
-  -e AI_MODEL=claude-sonnet-4-20250514 \
+  -e AI_PROVIDER=openai \
+  -e AI_MODEL=gpt-5-mini \
   -e AI_API_KEY=your_api_key_here \
   -v isir_data:/var/www/html/storage \
   ghcr.io/yassinebenh/isir:latest
