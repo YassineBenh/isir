@@ -4,12 +4,29 @@
 
 ### Docker Compose (Recommended)
 
+```yaml
+services:
+    isir:
+        image: ghcr.io/yassinebenh/isir:latest
+        restart: unless-stopped
+        ports:
+            - '8080:8080'
+        environment:
+            APP_URL: 'https://your-domain.com'
+        volumes:
+            - isir_data:/var/www/html/storage
+
+volumes:
+    isir_data:
+```
+
+Set `APP_URL` to your domain.
+
 ```bash
-curl -O https://raw.githubusercontent.com/yassinebenh/isir/main/docker-compose.yaml
 docker compose up -d
 ```
 
-Edit `docker-compose.yaml` to set your `APP_URL`.
+The app will be available at `http://localhost:8080`.
 
 ### Docker
 
@@ -21,4 +38,4 @@ docker run -d \
   ghcr.io/yassinebenh/isir:latest
 ```
 
-The app will be available at `http://localhost:8080`.
+Set `APP_URL` to your domain. The app will be available at `http://localhost:8080`.
