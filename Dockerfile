@@ -34,16 +34,6 @@ COPY --chown=www-data:www-data . .
 RUN npm run build
 
 ############################################
-# Production Node Modules
-############################################
-FROM base AS node_modules
-
-WORKDIR /var/www/html
-
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-############################################
 # Production Deploy Image
 ############################################
 FROM base AS deploy
