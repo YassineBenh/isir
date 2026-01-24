@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FileText, Folder, LayoutGrid, Send } from 'lucide-react';
+import { FileText, Folder, LayoutGrid, Send } from 'lucide-react';
 
 import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import DigestController from '@/actions/App/Http/Controllers/DigestController';
@@ -43,11 +43,6 @@ const footerNavItems: NavItem[] = [
         title: 'Repository',
         href: 'https://github.com/yassinebenh/isir',
         icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
     },
 ];
 
