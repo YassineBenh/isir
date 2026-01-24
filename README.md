@@ -49,11 +49,11 @@ To enable email delivery for your digests, configure the mail environment variab
 
 For the full list of supported mail drivers and configuration options, see the [Laravel Mail documentation](https://laravel.com/docs/mail).
 
+The app will be available at `http://localhost:8080`.
+
 ```bash
 docker compose up -d
 ```
-
-The app will be available at `http://localhost:8080`.
 
 ### Docker
 
