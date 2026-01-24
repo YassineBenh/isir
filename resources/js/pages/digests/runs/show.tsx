@@ -310,10 +310,10 @@ export default function DigestRunShow({ digest, run }: Props) {
                                 </TabsList>
 
                                 <TabsContent value="rendered" className="mt-4">
-                                    {run.rendered_content ? (
+                                    {run.ai_summary ? (
                                         <div className="prose prose-sm dark:prose-invert max-w-none">
                                             <Markdown>
-                                                {run.rendered_content}
+                                                {run.ai_summary}
                                             </Markdown>
                                         </div>
                                     ) : (
@@ -323,10 +323,10 @@ export default function DigestRunShow({ digest, run }: Props) {
                                                     <Sparkles />
                                                 </EmptyMedia>
                                                 <EmptyTitle>
-                                                    No rendered content
+                                                    No AI summary
                                                 </EmptyTitle>
                                                 <EmptyDescription>
-                                                    AI-generated content will
+                                                    AI-generated summary will
                                                     appear here once the digest
                                                     is processed.
                                                 </EmptyDescription>

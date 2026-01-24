@@ -16,6 +16,7 @@ interface Props {
     destinations: DestinationsByType;
     timezones: string[];
     maxRepos: number;
+    aiConfigured: boolean;
 }
 
 export default function DigestEdit({
@@ -23,6 +24,7 @@ export default function DigestEdit({
     destinations,
     timezones,
     maxRepos,
+    aiConfigured,
 }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -52,6 +54,7 @@ export default function DigestEdit({
                             destinations={destinations}
                             timezones={timezones}
                             maxRepos={maxRepos}
+                            aiConfigured={aiConfigured}
                             onCancel={() =>
                                 router.visit(DigestController.index().url)
                             }

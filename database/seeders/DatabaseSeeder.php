@@ -300,7 +300,7 @@ class DatabaseSeeder extends Seeder
             'status' => 'completed',
             'started_at' => now()->subDay()->setTime(9, 0, 0),
             'finished_at' => now()->subDay()->setTime(9, 2, 30),
-            'rendered_content' => $this->generateRenderedContent($sources),
+            'ai_summary' => $this->generateAiSummary($sources),
         ]);
 
         // Attach some source items to the completed run
@@ -336,23 +336,16 @@ class DatabaseSeeder extends Seeder
     /**
      * @param  Source[]  $sources
      */
-    private function generateRenderedContent(array $sources): string
+    private function generateAiSummary(array $sources): string
     {
-        $content = "# Release Digest\n\n";
-        $content .= '*Generated on '.now()->subDay()->format('F j, Y')."*\n\n";
+        $summaries = [];
 
         foreach ($sources as $source) {
-            $content .= "## {$source->name}\n\n";
             $items = $source->items()->orderByDesc('published_at')->take(2)->get();
-
-            foreach ($items as $item) {
-                $content .= "### {$item->title}\n\n";
-                $content .= "Released: {$item->published_at->format('M j, Y')}\n\n";
-                $content .= "{$item->raw_content}\n\n";
-                $content .= "---\n\n";
-            }
+            $versions = $items->pluck('title')->implode(' and ');
+            $summaries[] = "**{$source->name}** released {$versions} with various improvements and bug fixes.";
         }
 
-        return $content;
+        return "Here's a summary of your updates:\n\n".implode("\n\n", $summaries);
     }
 }

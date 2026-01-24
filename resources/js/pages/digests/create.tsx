@@ -22,12 +22,14 @@ interface Props {
     destinations: DestinationsByType;
     timezones: string[];
     maxRepos: number;
+    aiConfigured: boolean;
 }
 
 export default function DigestCreate({
     destinations,
     timezones,
     maxRepos,
+    aiConfigured,
 }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -45,6 +47,7 @@ export default function DigestCreate({
                             destinations={destinations}
                             timezones={timezones}
                             maxRepos={maxRepos}
+                            aiConfigured={aiConfigured}
                             onCancel={() =>
                                 router.visit(DigestController.index().url)
                             }

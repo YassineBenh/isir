@@ -18,7 +18,7 @@ class DigestRun extends Model
         'period_start_at',
         'period_end_at',
         'status',
-        'rendered_content',
+        'ai_summary',
         'started_at',
         'finished_at',
         'error',

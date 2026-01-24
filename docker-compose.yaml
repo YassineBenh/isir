@@ -7,6 +7,9 @@ services:
         environment:
             APP_URL: 'https://your-domain.com' # Required: Set your application URL
             # GITHUB_TOKEN: ''                 # Optional: Increases rate limit (60 → 5000 req/hr)
+            # AI_PROVIDER: ''                  # Optional: anthropic, openai, ollama, gemini, mistral, groq
+            # AI_MODEL: ''                     # Optional: Model name (e.g., claude-sonnet-4-20250514)
+            # AI_API_KEY: ''                   # Optional: API key for the AI provider
         volumes:
             - isir_data:/var/www/html/storage
 

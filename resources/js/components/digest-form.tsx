@@ -31,6 +31,7 @@ interface DigestFormProps {
     destinations: DestinationsByType;
     timezones: string[];
     maxRepos: number;
+    aiConfigured?: boolean;
     onCancel?: () => void;
 }
 
@@ -73,6 +74,7 @@ export function DigestForm({
     destinations,
     timezones,
     maxRepos,
+    aiConfigured = false,
     onCancel,
 }: DigestFormProps) {
     const isEditing = !!digest;
@@ -341,7 +343,8 @@ export function DigestForm({
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="ai_enabled"
-                        checked={data.ai_enabled}
+                        checked={aiConfigured && data.ai_enabled}
+                        disabled={!aiConfigured}
                         onCheckedChange={(checked) =>
                             setData('ai_enabled', checked === true)
                         }
@@ -353,10 +356,36 @@ export function DigestForm({
                         Generate AI summaries for releases
                     </Label>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                    When enabled, each release will include an AI-generated
-                    summary of the changes.
-                </p>
+                {aiConfigured ? (
+                    <p className="text-xs text-muted-foreground">
+                        When enabled, each release will include an AI-generated
+                        summary of the changes.
+                    </p>
+                ) : (
+                    <p className="text-xs text-muted-foreground">
+                        AI is not configured. Set{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                            AI_PROVIDER
+                        </code>
+                        ,{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                            AI_MODEL
+                        </code>
+                        , and{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                            AI_API_KEY
+                        </code>{' '}
+                        environment variables to enable this feature.{' '}
+                        <a
+                            href="https://github.com/yassinebenh/isir#ai-summaries"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline underline-offset-2"
+                        >
+                            Learn more
+                        </a>
+                    </p>
+                )}
             </div>
 
             {/* Submit */}

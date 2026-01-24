@@ -167,7 +167,7 @@ export interface DigestRun {
     period_start_at: string;
     period_end_at: string;
     status: DigestRunStatus;
-    rendered_content: string | null;
+    ai_summary: string | null;
     started_at: string | null;
     finished_at: string | null;
     error: string | null;

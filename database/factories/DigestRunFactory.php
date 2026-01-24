@@ -25,7 +25,7 @@ class DigestRunFactory extends Factory
             'period_start_at' => $periodStart,
             'period_end_at' => $periodEnd,
             'status' => 'pending',
-            'rendered_content' => null,
+            'ai_summary' => null,
             'started_at' => null,
             'finished_at' => null,
             'error' => null,
@@ -52,7 +52,7 @@ class DigestRunFactory extends Factory
             'status' => 'completed',
             'started_at' => now()->subMinutes(5),
             'finished_at' => now(),
-            'rendered_content' => "# Release Digest\n\n## laravel/framework\n\n### v11.0.0\n\n- New features\n- Bug fixes\n",
+            'ai_summary' => "Here's a summary of your updates:\n\n**Laravel Framework** - Version 11.0.0 brings new features and bug fixes.",
         ]);
     }
 

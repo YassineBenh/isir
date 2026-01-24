@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->digest = Digest::factory()->create(['user_id' => $this->user->id]);
     $this->run = DigestRun::factory()->completed()->create([
         'digest_id' => $this->digest->id,
-        'rendered_content' => '# Release Notes',
+        'ai_summary' => 'Summary of release notes',
     ]);
 });
 

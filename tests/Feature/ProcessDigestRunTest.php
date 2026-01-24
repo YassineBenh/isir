@@ -11,15 +11,28 @@ use App\Models\Source;
 use App\Models\SourceItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Prism\Prism\Facades\Prism;
+use Prism\Prism\Testing\TextResponseFake;
 
 beforeEach(function () {
+    // Configure AI for tests
+    config(['services.ai.provider' => 'anthropic']);
+    config(['services.ai.model' => 'claude-sonnet-4-20250514']);
+    config(['services.ai.api_key' => 'test-api-key']);
+
     $this->user = User::factory()->create();
     $this->digest = Digest::factory()->create([
         'user_id' => $this->user->id,
         'last_successful_run_at' => null,
+        'ai_enabled' => true,
     ]);
     $this->source = Source::factory()->create();
     $this->digest->sources()->attach($this->source);
+
+    // Set up default Prism fake
+    Prism::fake([
+        TextResponseFake::make()->withText('AI generated summary for the digest.'),
+    ]);
 });
 
 describe('ProcessDigestRun', function () {
@@ -68,9 +81,30 @@ describe('ProcessDigestRun', function () {
         expect($digestRun->sourceItems->first()->id)->toBe($withinPeriod->id);
     });
 
-    it('renders content with items', function () {
-        // Set last_successful_run_at to 1 day ago so items are within period
+    it('generates AI summary when ai_enabled is true', function () {
         $this->digest->update(['last_successful_run_at' => now()->subDay()]);
+
+        SourceItem::factory()->create([
+            'source_id' => $this->source->id,
+            'title' => 'v1.0.0',
+            'published_at' => now()->subHour(),
+        ]);
+
+        Prism::fake([
+            TextResponseFake::make()->withText('**Laravel Framework** released v1.0.0 with new features.'),
+        ]);
+
+        $action = app(ProcessDigestRun::class);
+        $digestRun = $action($this->digest);
+
+        expect($digestRun->ai_summary)->toBe('**Laravel Framework** released v1.0.0 with new features.');
+    });
+
+    it('does not generate AI summary when ai_enabled is false', function () {
+        $this->digest->update([
+            'ai_enabled' => false,
+            'last_successful_run_at' => now()->subDay(),
+        ]);
 
         SourceItem::factory()->create([
             'source_id' => $this->source->id,
@@ -81,16 +115,18 @@ describe('ProcessDigestRun', function () {
         $action = app(ProcessDigestRun::class);
         $digestRun = $action($this->digest);
 
-        expect($digestRun->rendered_content)->toContain($this->digest->name);
-        expect($digestRun->rendered_content)->toContain('v1.0.0');
-        expect($digestRun->rendered_content)->toContain('1 update(s)');
+        expect($digestRun->ai_summary)->toBeNull();
     });
 
-    it('renders no updates message when no items', function () {
+    it('generates no updates message when no items', function () {
+        Prism::fake([
+            TextResponseFake::make()->withText('No updates during this period.'),
+        ]);
+
         $action = app(ProcessDigestRun::class);
         $digestRun = $action($this->digest);
 
-        expect($digestRun->rendered_content)->toContain('No updates during this period');
+        expect($digestRun->ai_summary)->toBe('No updates during this period.');
     });
 
     it('updates last_successful_run_at on success', function () {

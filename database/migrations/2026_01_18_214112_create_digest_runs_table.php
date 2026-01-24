@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamp('period_start_at');
             $table->timestamp('period_end_at');
             $table->string('status')->default('pending'); // pending, running, completed, failed
-            $table->longText('rendered_content')->nullable(); // markdown digest
+            $table->longText('ai_summary')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
             $table->text('error')->nullable();

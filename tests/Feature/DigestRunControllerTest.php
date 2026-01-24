@@ -14,7 +14,7 @@ describe('show', function () {
         $digest = Digest::factory()->create(['user_id' => $this->user->id]);
         $run = DigestRun::factory()->completed()->create([
             'digest_id' => $digest->id,
-            'rendered_content' => '# Test Content',
+            'ai_summary' => 'Test AI summary content',
         ]);
 
         $response = $this->actingAs($this->user)->get("/digests/{$digest->id}/runs/{$run->id}");

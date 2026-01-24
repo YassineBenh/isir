@@ -8,6 +8,7 @@ use App\Actions\UpdateDigest;
 use App\Http\Requests\StoreDigestRequest;
 use App\Http\Requests\UpdateDigestRequest;
 use App\Models\Digest;
+use App\Services\AIService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,10 @@ use Inertia\Response;
 class DigestController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(
+        private readonly AIService $aiService,
+    ) {}
 
     /**
      * Display a listing of digests.
@@ -71,6 +76,7 @@ class DigestController extends Controller
                 ->groupBy('type'),
             'timezones' => config('isir.timezones'),
             'maxRepos' => config('isir.limits.github_repos_per_digest'),
+            'aiConfigured' => $this->aiService->isConfigured(),
         ]);
     }
 
@@ -105,6 +111,7 @@ class DigestController extends Controller
                 ->groupBy('type'),
             'timezones' => config('isir.timezones'),
             'maxRepos' => config('isir.limits.github_repos_per_digest'),
+            'aiConfigured' => $this->aiService->isConfigured(),
         ]);
     }
 

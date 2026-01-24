@@ -11,12 +11,12 @@ use Illuminate\Support\Collection;
 class ProcessDigestRun
 {
     public function __construct(
-        private readonly RenderDigestContent $renderDigestContent,
+        private readonly GenerateAiSummary $generateAiSummary,
         private readonly DeliverDigestRun $deliverDigestRun,
     ) {}
 
     /**
-     * Process a digest run: gather items, render content, and deliver.
+     * Process a digest run: gather items, generate AI summary, and deliver.
      */
     public function __invoke(Digest $digest): DigestRun
     {
@@ -35,11 +35,13 @@ class ProcessDigestRun
 
             $this->attachItems($digestRun, $items);
 
-            $renderedContent = ($this->renderDigestContent)($digestRun, $items);
+            if ($digest->ai_enabled) {
+                $aiSummary = ($this->generateAiSummary)($digestRun, $items);
 
-            $digestRun->update([
-                'rendered_content' => $renderedContent,
-            ]);
+                $digestRun->update([
+                    'ai_summary' => $aiSummary,
+                ]);
+            }
 
             ($this->deliverDigestRun)($digestRun);
 
