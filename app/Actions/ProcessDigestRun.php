@@ -6,11 +6,13 @@ use App\Enums\DigestRunStatus;
 use App\Models\Digest;
 use App\Models\DigestRun;
 use App\Models\SourceItem;
+use App\Services\AIService;
 use Illuminate\Support\Collection;
 
 class ProcessDigestRun
 {
     public function __construct(
+        private readonly AIService $aiService,
         private readonly GenerateAiSummary $generateAiSummary,
         private readonly DeliverDigestRun $deliverDigestRun,
     ) {}
@@ -35,7 +37,7 @@ class ProcessDigestRun
 
             $this->attachItems($digestRun, $items);
 
-            if ($digest->ai_enabled) {
+            if ($digest->ai_enabled && $this->aiService->isConfigured()) {
                 $aiSummary = ($this->generateAiSummary)($digestRun, $items);
 
                 $digestRun->update([
