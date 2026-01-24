@@ -43,6 +43,12 @@ To enable AI-generated summaries for your digests, configure these environment v
 
 All three variables must be set for AI summaries to work. When not configured, the AI summary feature will be disabled in the UI.
 
+### Email Notifications
+
+To enable email delivery for your digests, configure the mail environment variables. ISIR uses Laravel's mail system, which supports multiple drivers including SMTP, Mailgun, Postmark, SES, and more.
+
+For the full list of supported mail drivers and configuration options, see the [Laravel Mail documentation](https://laravel.com/docs/mail).
+
 ```bash
 docker compose up -d
 ```
