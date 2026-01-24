@@ -73,12 +73,4 @@ class Digest extends Model
     {
         return $this->hasMany(DigestRun::class);
     }
-
-    /**
-     * @return HasMany<DigestItemSummary, $this>
-     */
-    public function itemSummaries(): HasMany
-    {
-        return $this->hasMany(DigestItemSummary::class);
-    }
 }

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SourceItem extends Model
 {
@@ -40,14 +39,6 @@ class SourceItem extends Model
     public function source(): BelongsTo
     {
         return $this->belongsTo(Source::class);
-    }
-
-    /**
-     * @return HasMany<DigestItemSummary, $this>
-     */
-    public function summaries(): HasMany
-    {
-        return $this->hasMany(DigestItemSummary::class);
     }
 
     /**
