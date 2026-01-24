@@ -83,7 +83,9 @@ describe('store', function () {
         ]);
     });
 
-    it('creates an email destination', function () {
+    it('creates an email destination when mailer is configured', function () {
+        config(['mail.default' => 'smtp']);
+
         $response = $this->actingAs($this->user)->post('/destinations', [
             'type' => 'email',
             'name' => 'Personal Email',
@@ -95,6 +97,30 @@ describe('store', function () {
         $destination = Destination::first();
         expect($destination->type)->toBe('email');
         expect($destination->config['email'])->toBe('test@example.com');
+    });
+
+    it('rejects email destination when mailer is not configured', function () {
+        config(['mail.default' => 'log']);
+
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'email',
+            'name' => 'Personal Email',
+            'email' => 'test@example.com',
+        ]);
+
+        $response->assertSessionHasErrors('type');
+    });
+
+    it('rejects email destination when mailer is array', function () {
+        config(['mail.default' => 'array']);
+
+        $response = $this->actingAs($this->user)->post('/destinations', [
+            'type' => 'email',
+            'name' => 'Personal Email',
+            'email' => 'test@example.com',
+        ]);
+
+        $response->assertSessionHasErrors('type');
     });
 
     it('validates type is required', function () {
@@ -135,6 +161,8 @@ describe('store', function () {
     });
 
     it('validates email is required for email type', function () {
+        config(['mail.default' => 'smtp']);
+
         $response = $this->actingAs($this->user)->post('/destinations', [
             'type' => 'email',
             'name' => 'Personal',
@@ -184,6 +212,8 @@ describe('store', function () {
     });
 
     it('validates email format', function () {
+        config(['mail.default' => 'smtp']);
+
         $response = $this->actingAs($this->user)->post('/destinations', [
             'type' => 'email',
             'name' => 'Personal',
@@ -195,6 +225,7 @@ describe('store', function () {
 
     it('enforces maximum destinations limit', function () {
         config(['isir.limits.destinations_per_user' => 5]);
+        config(['mail.default' => 'smtp']);
 
         Destination::factory(5)->create(['user_id' => $this->user->id]);
 
@@ -209,6 +240,7 @@ describe('store', function () {
 
     it('allows unlimited destinations when limit is -1', function () {
         config(['isir.limits.destinations_per_user' => -1]);
+        config(['mail.default' => 'smtp']);
 
         Destination::factory(100)->create(['user_id' => $this->user->id]);
 

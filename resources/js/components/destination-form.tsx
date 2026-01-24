@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { AxiosError } from 'axios';
 import { type FormEvent, useState } from 'react';
 
@@ -15,7 +15,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import axios from '@/lib/axios';
-import { type Destination, type DestinationType } from '@/types';
+import {
+    type Destination,
+    type DestinationType,
+    type SharedData,
+} from '@/types';
 
 interface DestinationFormProps {
     destination?: Destination;
@@ -37,6 +41,7 @@ export function DestinationForm({
     onCancel,
     onSuccess,
 }: DestinationFormProps) {
+    const { app } = usePage<SharedData>().props;
     const isEditing = !!destination;
     const [fetchErrors, setFetchErrors] = useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,9 +113,19 @@ export function DestinationForm({
                     <SelectContent>
                         <SelectItem value="slack">Slack</SelectItem>
                         <SelectItem value="discord">Discord</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
+                        <SelectItem
+                            value="email"
+                            disabled={!app.mailerConfigured}
+                        >
+                            Email
+                        </SelectItem>
                     </SelectContent>
                 </Select>
+                {!app.mailerConfigured && (
+                    <p className="text-xs text-muted-foreground">
+                        Configure a mailer to enable email destinations
+                    </p>
+                )}
                 <InputError message={allErrors.type} />
             </div>
 

@@ -41,7 +41,14 @@ class StoreDestinationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', 'string', Rule::in(['slack', 'discord', 'email'])],
+            'type' => [
+                'required',
+                'string',
+                Rule::in(['slack', 'discord', 'email']),
+                Rule::prohibitedIf(
+                    fn () => $this->input('type') === 'email' && ! $this->isMailerConfigured()
+                ),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'webhook_url' => [
                 Rule::requiredIf(fn () => in_array($this->input('type'), ['slack', 'discord'])),
@@ -76,6 +83,7 @@ class StoreDestinationRequest extends FormRequest
             'webhook_url.required_if' => 'The webhook URL is required for Slack and Discord destinations.',
             'email.required_if' => 'The email address is required for email destinations.',
             'email.email' => 'The email address must be a valid email address.',
+            'type.prohibited' => 'Email destinations require a configured mailer. Please configure your mail settings first.',
         ];
     }
 
@@ -89,5 +97,15 @@ class StoreDestinationRequest extends FormRequest
         return [
             'webhook_url' => 'webhook URL',
         ];
+    }
+
+    /**
+     * Determine if a real mailer is configured (not log or array).
+     */
+    private function isMailerConfigured(): bool
+    {
+        $mailer = config('mail.default');
+
+        return ! in_array($mailer, ['log', 'array'], true);
     }
 }

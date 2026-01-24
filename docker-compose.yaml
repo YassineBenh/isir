@@ -2,27 +2,10 @@ services:
     isir:
         image: ghcr.io/yassinebenh/isir:latest
         restart: unless-stopped
-        environment:
-            PHP_OPCACHE_ENABLE: '1'
-            AUTORUN_ENABLED: 'true'
-            APP_KEY: ${APP_KEY}
-            APP_NAME: ${APP_NAME}
-            APP_ENV: ${APP_ENV}
-            APP_DEBUG: ${APP_DEBUG}
-            APP_URL: ${APP_URL}
-            MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS}
-            MAIL_FROM_NAME: ${MAIL_FROM_NAME}
-            MAIL_MAILER: ${MAIL_MAILER}
-            MAIL_SCHEME: ${MAIL_SCHEME}
-            MAIL_HOST: ${MAIL_HOST}
-            MAIL_PASSWORD: ${MAIL_PASSWORD}
-            MAIL_PORT: ${MAIL_PORT}
-            MAIL_USERNAME: ${MAIL_USERNAME}
-            VITE_APP_NAME: ${VITE_APP_NAME}
+        ports:
+            - '8080:8080'
         volumes:
-            - storage_data:/var/www/html/storage/app
-            - storage_logs:/var/www/html/storage/logs
+            - isir_data:/var/www/html/storage
 
 volumes:
-    storage_data:
-    storage_logs:
+    isir_data:

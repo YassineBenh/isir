@@ -42,7 +42,20 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'isSelfHosted' => config('isir.self_hosted'),
+            'app' => [
+                'isSelfHosted' => config('isir.self_hosted'),
+                'mailerConfigured' => $this->isMailerConfigured(),
+            ],
         ];
+    }
+
+    /**
+     * Determine if a real mailer is configured (not log or array).
+     */
+    private function isMailerConfigured(): bool
+    {
+        $mailer = config('mail.default');
+
+        return ! in_array($mailer, ['log', 'array'], true);
     }
 }

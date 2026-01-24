@@ -48,6 +48,9 @@ RUN npm ci --omit=dev
 ############################################
 FROM base AS deploy
 
+ENV PHP_OPCACHE_ENABLE="1"
+ENV AUTORUN_ENABLED="true"
+
 WORKDIR /var/www/html
 
 COPY --from=build --chown=www-data:www-data /var/www/html/vendor ./vendor
@@ -62,6 +65,7 @@ COPY --from=build --chown=www-data:www-data /var/www/html/storage ./storage
 COPY --from=build --chown=www-data:www-data /var/www/html/artisan ./artisan
 COPY --from=build --chown=www-data:www-data /var/www/html/composer.json ./composer.json
 COPY --from=build --chown=www-data:www-data /var/www/html/composer.lock ./composer.lock
+COPY --from=build --chown=www-data:www-data /var/www/html/.env.example.production ./.env.example.production
 
 COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/
 

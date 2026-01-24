@@ -5,6 +5,11 @@ export interface Auth {
     user: User;
 }
 
+export interface AppConfig {
+    isSelfHosted: boolean;
+    mailerConfigured: boolean;
+}
+
 export interface BreadcrumbItem {
     title: string;
     href: string;
@@ -26,6 +31,7 @@ export interface SharedData {
     name: string;
     auth: Auth;
     sidebarOpen: boolean;
+    app: AppConfig;
     [key: string]: unknown;
 }
 
