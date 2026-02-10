@@ -15,14 +15,20 @@ fi
 # Generate or restore APP_KEY
 if [ -f "$KEY_FILE" ]; then
     echo "Restoring APP_KEY from backup..."
-    APP_KEY=$(cat "$KEY_FILE")
+    APP_KEY="$(tr -d '\r\n' < "$KEY_FILE")"
 else
     echo "Generating new APP_KEY..."
-    APP_KEY=$(php artisan key:generate --show)
-    echo "$APP_KEY" > "$KEY_FILE"
+    APP_KEY="$(php artisan key:generate --show)"
+    printf '%s\n' "$APP_KEY" > "$KEY_FILE"
 fi
 
 # Update APP_KEY in .env
-sed -i "s/^APP_KEY=.*/APP_KEY=$APP_KEY/" "$ENV_FILE"
+ESCAPED_APP_KEY="$(printf '%s' "$APP_KEY" | sed -e 's/[&|]/\\&/g')"
+
+if grep -q '^APP_KEY=' "$ENV_FILE"; then
+    sed -i "s|^APP_KEY=.*|APP_KEY=$ESCAPED_APP_KEY|" "$ENV_FILE"
+else
+    printf '\nAPP_KEY=%s\n' "$APP_KEY" >> "$ENV_FILE"
+fi
 
 exit 0
