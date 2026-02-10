@@ -33,11 +33,12 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useActiveUrl } from '@/hooks/use-active-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+
+import { dashboard } from '@/routes';
 
 const mainNavItems: NavItem[] = [
     {

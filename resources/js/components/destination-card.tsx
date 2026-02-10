@@ -8,7 +8,6 @@ import {
     Trash2,
 } from 'lucide-react';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +26,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import { type Destination, type DestinationType } from '@/types';
+
+import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 
 const typeConfig: Record<
     DestinationType,

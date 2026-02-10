@@ -1,6 +1,5 @@
 import { Head, router } from '@inertiajs/react';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { DigestForm } from '@/components/digest-form';
 import Heading from '@/components/heading';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import {
     type DestinationsByType,
     type Digest,
 } from '@/types';
+
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 interface Props {
     digest: Digest;
