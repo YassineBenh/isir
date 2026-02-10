@@ -58,5 +58,6 @@ COPY --from=build --chown=www-data:www-data /var/www/html/composer.lock ./compos
 COPY --from=build --chown=www-data:www-data /var/www/html/.env.example.production ./.env.example.production
 
 COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/
+COPY --chmod=755 ./docker/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 
 USER www-data
