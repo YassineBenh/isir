@@ -2,11 +2,20 @@
     "agents": [
         "opencode"
     ],
-    "editors": [
-        "opencode"
+    "guidelines": true,
+    "herd_mcp": true,
+    "mcp": true,
+    "packages": [
+        "laravel/fortify",
+        "prism-php/prism"
     ],
-    "guidelines": [
-        "laravel/fortify"
-    ],
-    "herd_mcp": true
+    "sail": false,
+    "skills": [
+        "wayfinder-development",
+        "pest-testing",
+        "inertia-react-development",
+        "tailwindcss-development",
+        "developing-with-fortify",
+        "developing-with-prism"
+    ]
 }
