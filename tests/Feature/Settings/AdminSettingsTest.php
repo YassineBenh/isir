@@ -30,16 +30,16 @@ test('admin can toggle registration setting', function () {
     $admin->assignRole('admin');
 
     $settings = app(AdminSettings::class);
-    expect($settings->registration_enabled)->toBeTrue();
+    expect($settings->registration_enabled)->toBeFalse();
 
     $response = $this->actingAs($admin)->patch(route('admin.update'), [
-        'registration_enabled' => false,
+        'registration_enabled' => true,
     ]);
 
     $response->assertRedirect(route('admin.edit'));
 
     $settings->refresh();
-    expect($settings->registration_enabled)->toBeFalse();
+    expect($settings->registration_enabled)->toBeTrue();
 });
 
 test('non-admin cannot update admin settings', function () {
@@ -47,13 +47,13 @@ test('non-admin cannot update admin settings', function () {
     $user->assignRole('user');
 
     $response = $this->actingAs($user)->patch(route('admin.update'), [
-        'registration_enabled' => false,
+        'registration_enabled' => true,
     ]);
 
     $response->assertForbidden();
 
     $settings = app(AdminSettings::class);
-    expect($settings->registration_enabled)->toBeTrue();
+    expect($settings->registration_enabled)->toBeFalse();
 });
 
 test('registration page redirects to login when registration is disabled', function () {

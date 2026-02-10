@@ -1,6 +1,12 @@
 <?php
 
+use App\Settings\AdminSettings;
+
 test('registration screen can be rendered', function () {
+    $settings = app(AdminSettings::class);
+    $settings->registration_enabled = true;
+    $settings->save();
+
     $response = $this->get(route('register'));
 
     $response->assertOk();
