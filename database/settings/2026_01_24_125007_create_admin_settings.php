@@ -6,6 +6,6 @@ return new class extends SettingsMigration
 {
     public function up(): void
     {
-        $this->migrator->add('admin.registration_enabled', true);
+        $this->migrator->add('admin.registration_enabled', false);
     }
 };
