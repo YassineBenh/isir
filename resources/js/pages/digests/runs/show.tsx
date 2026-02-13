@@ -302,7 +302,7 @@ export default function DigestRunShow({ digest, run }: Props) {
                                 <TabsList>
                                     <TabsTrigger value="rendered">
                                         <Sparkles className="size-4" />
-                                        Rendered
+                                        AI Summary
                                     </TabsTrigger>
                                     <TabsTrigger value="original">
                                         <FileText className="size-4" />
