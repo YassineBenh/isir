@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use Prism\Prism\Enums\Provider;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Text\PendingRequest;
+use Laravel\Ai\Enums\Lab;
 
 class AIService
 {
@@ -13,23 +11,39 @@ class AIService
      */
     public function isConfigured(): bool
     {
-        return $this->getProvider() !== null
-            && $this->getModel() !== null
-            && $this->getApiKey() !== null;
+        $provider = $this->getProvider();
+
+        if ($provider === null) {
+            return false;
+        }
+
+        if ($provider === Lab::Ollama->value) {
+            $url = config('ai.providers.ollama.url');
+
+            return is_string($url) && trim($url) !== '';
+        }
+
+        $apiKey = config("ai.providers.{$provider}.key");
+
+        return is_string($apiKey) && trim($apiKey) !== '';
     }
 
     /**
-     * Get a prepared Prism text generation instance.
+     * Generate a digest summary from prompt content.
      */
-    public function text(): PendingRequest
+    public function summarizeDigest(string $prompt): string
     {
         if (! $this->isConfigured()) {
-            throw new \RuntimeException('AI is not configured. Please set AI_PROVIDER, AI_MODEL, and AI_API_KEY environment variables.');
+            throw new \RuntimeException('AI is not configured. Set the API key for your configured provider in config/ai.php (for example OPENAI_API_KEY).');
         }
 
-        return Prism::text()
-            ->using($this->getPrismProvider(), $this->getModel())
-            ->usingProviderConfig(['api_key' => $this->getApiKey()]);
+        $response = DigestSummaryAgent::make()->prompt(
+            $prompt,
+            provider: $this->getLabProvider(),
+            model: $this->getModel(),
+        );
+
+        return $response->text;
     }
 
     /**
@@ -37,7 +51,17 @@ class AIService
      */
     public function getProvider(): ?string
     {
-        return config('services.ai.provider');
+        $provider = config('ai.default');
+
+        if ($provider instanceof Lab) {
+            return $provider->value;
+        }
+
+        if (! is_string($provider) || trim($provider) === '') {
+            return null;
+        }
+
+        return $provider;
     }
 
     /**
@@ -45,32 +69,32 @@ class AIService
      */
     public function getModel(): ?string
     {
-        return config('services.ai.model');
+        $provider = $this->getProvider();
+
+        if ($provider === null) {
+            return null;
+        }
+
+        $model = config("ai.providers.{$provider}.model");
+
+        return is_string($model) && trim($model) !== '' ? $model : null;
     }
 
     /**
-     * Get the configured API key.
+     * Get the AI provider enum from the configured provider string.
      */
-    public function getApiKey(): ?string
+    private function getLabProvider(): Lab
     {
-        return config('services.ai.api_key');
-    }
+        $provider = $this->getProvider();
 
-    /**
-     * Get the Prism Provider enum from the configured provider string.
-     */
-    private function getPrismProvider(): Provider
-    {
-        return match ($this->getProvider()) {
-            'openai' => Provider::OpenAI,
-            'anthropic' => Provider::Anthropic,
-            'ollama' => Provider::Ollama,
-            'gemini' => Provider::Gemini,
-            'mistral' => Provider::Mistral,
-            'groq' => Provider::Groq,
-            'deepseek' => Provider::DeepSeek,
-            'xai' => Provider::XAI,
-            default => throw new \RuntimeException("Unknown AI provider: {$this->getProvider()}"),
-        };
+        if ($provider === null) {
+            throw new \RuntimeException('AI provider is not configured.');
+        }
+
+        try {
+            return Lab::from($provider);
+        } catch (\ValueError $e) {
+            throw new \RuntimeException("Unknown AI provider: {$provider}", previous: $e);
+        }
     }
 }

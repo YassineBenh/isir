@@ -6,14 +6,14 @@ use App\Models\DigestRun;
 use App\Models\Source;
 use App\Models\SourceItem;
 use App\Models\User;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
+use App\Services\DigestSummaryAgent;
+use Laravel\Ai\Prompts\AgentPrompt;
 
 beforeEach(function () {
     // Configure AI for tests
-    config(['services.ai.provider' => 'anthropic']);
-    config(['services.ai.model' => 'claude-sonnet-4-20250514']);
-    config(['services.ai.api_key' => 'test-api-key']);
+    config(['ai.default' => 'anthropic']);
+    config(['ai.providers.anthropic.key' => 'test-api-key']);
+    config(['ai.providers.anthropic.model' => 'claude-sonnet-4-20250514']);
 
     $this->user = User::factory()->create();
     $this->digest = Digest::factory()->create([
@@ -46,8 +46,8 @@ describe('GenerateAiSummary', function () {
             ]),
         ]);
 
-        Prism::fake([
-            TextResponseFake::make()->withText('**Laravel Framework** released v12.0.0 with major new features.'),
+        DigestSummaryAgent::fake([
+            '**Laravel Framework** released v12.0.0 with major new features.',
         ]);
 
         $action = app(GenerateAiSummary::class);
@@ -70,15 +70,17 @@ describe('GenerateAiSummary', function () {
             ]),
         ]);
 
-        $fake = Prism::fake([
-            TextResponseFake::make()->withText('Summary for multiple sources.'),
+        DigestSummaryAgent::fake([
+            'Summary for multiple sources.',
         ]);
 
         $action = app(GenerateAiSummary::class);
         $action($this->digestRun, $items);
 
-        // Verify the prompt was sent to Prism
-        $fake->assertCallCount(1);
+        DigestSummaryAgent::assertPrompted(function (AgentPrompt $prompt) {
+            return $prompt->contains('## Source: Laravel Framework')
+                && $prompt->contains('## Source: Inertia.js');
+        });
     });
 
     it('truncates long content in the prompt', function () {
@@ -92,21 +94,23 @@ describe('GenerateAiSummary', function () {
             ]),
         ]);
 
-        $fake = Prism::fake([
-            TextResponseFake::make()->withText('Summary generated.'),
+        DigestSummaryAgent::fake([
+            'Summary generated.',
         ]);
 
         $action = app(GenerateAiSummary::class);
         $result = $action($this->digestRun, $items);
 
         expect($result)->toBe('Summary generated.');
-        $fake->assertCallCount(1);
+        DigestSummaryAgent::assertPrompted(function (AgentPrompt $prompt) {
+            return $prompt->contains(str_repeat('a', 2000).'...');
+        });
     });
 
     it('uses configured AI provider and model', function () {
-        config(['services.ai.provider' => 'openai']);
-        config(['services.ai.model' => 'gpt-4o']);
-        config(['services.ai.api_key' => 'test-openai-key']);
+        config(['ai.default' => 'openai']);
+        config(['ai.providers.openai.key' => 'test-openai-key']);
+        config(['ai.providers.openai.model' => 'gpt-4o']);
 
         $items = collect([
             SourceItem::factory()->create([
@@ -115,16 +119,19 @@ describe('GenerateAiSummary', function () {
             ]),
         ]);
 
-        $fake = Prism::fake([
-            TextResponseFake::make()->withText('OpenAI summary.'),
+        DigestSummaryAgent::fake([
+            'OpenAI summary.',
         ]);
 
         $action = app(GenerateAiSummary::class);
         $result = $action($this->digestRun, $items);
 
         expect($result)->toBe('OpenAI summary.');
-        $fake->assertRequest(function ($requests) {
-            expect($requests[0]->model())->toBe('gpt-4o');
+        DigestSummaryAgent::assertPrompted(function (AgentPrompt $prompt) {
+            expect($prompt->provider()->name())->toBe('openai');
+            expect($prompt->model)->toBe('gpt-4o');
+
+            return true;
         });
     });
 });

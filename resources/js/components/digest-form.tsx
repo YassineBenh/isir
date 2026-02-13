@@ -364,19 +364,19 @@ export function DigestForm({
                     </p>
                 ) : (
                     <p className="text-xs text-muted-foreground">
-                        AI is not configured. Set{' '}
+                        AI is not configured. Set a provider key like{' '}
                         <code className="rounded bg-muted px-1 py-0.5 text-xs">
-                            AI_PROVIDER
-                        </code>
-                        ,{' '}
-                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
-                            AI_MODEL
-                        </code>
-                        , and{' '}
-                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
-                            AI_API_KEY
+                            OPENAI_API_KEY
                         </code>{' '}
-                        environment variables to enable this feature.{' '}
+                        and choose a default provider via{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                            AI_DEFAULT_PROVIDER
+                        </code>
+                        . You can also use provider-specific keys like{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                            ANTHROPIC_API_KEY
+                        </code>
+                        .{' '}
                         <a
                             href="https://github.com/yassinebenh/isir#ai-summaries"
                             target="_blank"

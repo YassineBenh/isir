@@ -18,9 +18,10 @@ services:
         environment:
             APP_URL: 'https://your-domain.com'
             # GITHUB_TOKEN: ''  # Optional: Increases rate limit (60 → 5000 req/hr)
-            # AI_PROVIDER: ''   # Optional: anthropic, openai, ollama, gemini, mistral, groq
-            # AI_MODEL: ''      # Optional: Model name (e.g., gpt-5-mini, claude-sonnet-4-20250514)
-            # AI_API_KEY: ''    # Optional: API key for the AI provider
+            # AI_DEFAULT_PROVIDER: 'openai' # Optional: openai, anthropic, ollama, gemini, mistral, groq, deepseek, xai
+            # OPENAI_API_KEY: ''            # Optional: required for openai provider
+            # ANTHROPIC_API_KEY: ''         # Optional: required for anthropic provider
+            # OLLAMA_BASE_URL: 'http://host.docker.internal:11434' # Optional: for ollama provider
         volumes:
             - isir_data:/var/www/html/storage
 
@@ -37,11 +38,11 @@ volumes:
 
 To enable AI-generated summaries for your digests, configure these environment variables:
 
-- `AI_PROVIDER` — The AI provider to use: `anthropic`, `openai`, `ollama`, `gemini`, `mistral`, or `groq`.
-- `AI_MODEL` — The model name (e.g., `gpt-5-mini` for OpenAI, `claude-sonnet-4-20250514` for Anthropic).
-- `AI_API_KEY` — Your API key for the chosen provider.
+- `AI_DEFAULT_PROVIDER` — The default provider used by Laravel AI (defaults to `openai`).
+- Provider API key env vars from Laravel AI (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`).
+- For local Ollama, set `AI_DEFAULT_PROVIDER=ollama` and optionally `OLLAMA_BASE_URL`.
 
-All three variables must be set for AI summaries to work. When not configured, the AI summary feature will be disabled in the UI.
+At least one valid provider key (or a reachable Ollama URL) must be configured for AI summaries to work. When not configured, the AI summary feature is disabled in the UI.
 
 ### Email Notifications
 
@@ -62,9 +63,8 @@ docker run -d \
   -p 8080:8080 \
   -e APP_URL=https://your-domain.com \
   -e GITHUB_TOKEN=your_token_here \
-  -e AI_PROVIDER=openai \
-  -e AI_MODEL=gpt-5-mini \
-  -e AI_API_KEY=your_api_key_here \
+  -e AI_DEFAULT_PROVIDER=openai \
+  -e OPENAI_API_KEY=your_api_key_here \
   -v isir_data:/var/www/html/storage \
   ghcr.io/yassinebenh/isir:latest
 ```

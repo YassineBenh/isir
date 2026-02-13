@@ -10,15 +10,14 @@ use App\Models\DigestRun;
 use App\Models\Source;
 use App\Models\SourceItem;
 use App\Models\User;
+use App\Services\DigestSummaryAgent;
 use Illuminate\Support\Facades\Http;
-use Prism\Prism\Facades\Prism;
-use Prism\Prism\Testing\TextResponseFake;
 
 beforeEach(function () {
     // Configure AI for tests
-    config(['services.ai.provider' => 'anthropic']);
-    config(['services.ai.model' => 'claude-sonnet-4-20250514']);
-    config(['services.ai.api_key' => 'test-api-key']);
+    config(['ai.default' => 'anthropic']);
+    config(['ai.providers.anthropic.key' => 'test-api-key']);
+    config(['ai.providers.anthropic.model' => 'claude-sonnet-4-20250514']);
 
     $this->user = User::factory()->create();
     $this->digest = Digest::factory()->create([
@@ -29,9 +28,9 @@ beforeEach(function () {
     $this->source = Source::factory()->create();
     $this->digest->sources()->attach($this->source);
 
-    // Set up default Prism fake
-    Prism::fake([
-        TextResponseFake::make()->withText('AI generated summary for the digest.'),
+    // Set up default AI fake
+    DigestSummaryAgent::fake([
+        'AI generated summary for the digest.',
     ]);
 });
 
@@ -90,8 +89,8 @@ describe('ProcessDigestRun', function () {
             'published_at' => now()->subHour(),
         ]);
 
-        Prism::fake([
-            TextResponseFake::make()->withText('**Laravel Framework** released v1.0.0 with new features.'),
+        DigestSummaryAgent::fake([
+            '**Laravel Framework** released v1.0.0 with new features.',
         ]);
 
         $action = app(ProcessDigestRun::class);
@@ -116,17 +115,19 @@ describe('ProcessDigestRun', function () {
         $digestRun = $action($this->digest);
 
         expect($digestRun->ai_summary)->toBeNull();
+        DigestSummaryAgent::assertNeverPrompted();
     });
 
     it('generates no updates message when no items', function () {
-        Prism::fake([
-            TextResponseFake::make()->withText('No updates during this period.'),
+        DigestSummaryAgent::fake([
+            'No updates during this period.',
         ]);
 
         $action = app(ProcessDigestRun::class);
         $digestRun = $action($this->digest);
 
         expect($digestRun->ai_summary)->toBe('No updates during this period.');
+        DigestSummaryAgent::assertNeverPrompted();
     });
 
     it('updates last_successful_run_at on success', function () {
