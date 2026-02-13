@@ -45,7 +45,9 @@ class ProcessDigestRun
                 ]);
             }
 
-            ($this->deliverDigestRun)($digestRun);
+            if ($items->isNotEmpty()) {
+                ($this->deliverDigestRun)($digestRun);
+            }
 
             $digestRun->update([
                 'status' => DigestRunStatus::Completed->value,

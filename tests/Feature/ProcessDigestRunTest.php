@@ -142,6 +142,13 @@ describe('ProcessDigestRun', function () {
             'hooks.slack.com/*' => Http::response('ok', 200),
         ]);
 
+        $this->digest->update(['last_successful_run_at' => now()->subDay()]);
+
+        SourceItem::factory()->create([
+            'source_id' => $this->source->id,
+            'published_at' => now()->subHour(),
+        ]);
+
         $destination = Destination::factory()->slack()->create([
             'user_id' => $this->user->id,
         ]);
@@ -158,6 +165,13 @@ describe('ProcessDigestRun', function () {
     });
 
     it('skips disabled destinations', function () {
+        $this->digest->update(['last_successful_run_at' => now()->subDay()]);
+
+        SourceItem::factory()->create([
+            'source_id' => $this->source->id,
+            'published_at' => now()->subHour(),
+        ]);
+
         $destination = Destination::factory()->slack()->disabled()->create([
             'user_id' => $this->user->id,
         ]);
@@ -169,9 +183,33 @@ describe('ProcessDigestRun', function () {
         expect(DeliveryAttempt::count())->toBe(0);
     });
 
+    it('does not deliver when no items are gathered', function () {
+        Http::fake([
+            'hooks.slack.com/*' => Http::response('ok', 200),
+        ]);
+
+        $destination = Destination::factory()->slack()->create([
+            'user_id' => $this->user->id,
+        ]);
+        $this->digest->destinations()->attach($destination);
+
+        $action = app(ProcessDigestRun::class);
+        $action($this->digest);
+
+        expect(DeliveryAttempt::count())->toBe(0);
+        Http::assertNothingSent();
+    });
+
     it('records failed delivery attempts', function () {
         Http::fake([
             'hooks.slack.com/*' => Http::response('error', 500),
+        ]);
+
+        $this->digest->update(['last_successful_run_at' => now()->subDay()]);
+
+        SourceItem::factory()->create([
+            'source_id' => $this->source->id,
+            'published_at' => now()->subHour(),
         ]);
 
         $destination = Destination::factory()->slack()->create([
@@ -194,6 +232,13 @@ describe('ProcessDigestRun', function () {
         Http::fake([
             'hooks.slack.com/*' => Http::response('ok', 200),
             'discord.com/*' => Http::response(['id' => 'msg123'], 200),
+        ]);
+
+        $this->digest->update(['last_successful_run_at' => now()->subDay()]);
+
+        SourceItem::factory()->create([
+            'source_id' => $this->source->id,
+            'published_at' => now()->subHour(),
         ]);
 
         $slack = Destination::factory()->slack()->create(['user_id' => $this->user->id]);
