@@ -57,7 +57,7 @@ export default function Welcome({
                                 Let's get started
                             </h1>
                             <p className="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
-                                Laravel has an incredibly rich ecosystem.
+                                Isir helps you track GitHub release updates.
                                 <br />
                                 We suggest starting with the following.
                             </p>
@@ -71,11 +71,11 @@ export default function Welcome({
                                     <span>
                                         Read the
                                         <a
-                                            href="https://laravel.com/docs"
+                                            href="https://github.com/yassinebenh/isir#readme"
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
-                                            <span>Documentation</span>
+                                            <span>ISIR Docs</span>
                                             <svg
                                                 width={10}
                                                 height={11}
@@ -100,13 +100,13 @@ export default function Welcome({
                                         </span>
                                     </span>
                                     <span>
-                                        Watch video tutorials at
+                                        Explore the latest
                                         <a
-                                            href="https://laracasts.com"
+                                            href="https://github.com/yassinebenh/isir/releases"
                                             target="_blank"
                                             className="ml-1 inline-flex items-center space-x-1 font-medium text-[#f53003] underline underline-offset-4 dark:text-[#FF4433]"
                                         >
-                                            <span>Laracasts</span>
+                                            <span>Releases</span>
                                             <svg
                                                 width={10}
                                                 height={11}
@@ -128,11 +128,11 @@ export default function Welcome({
                             <ul className="flex gap-3 text-sm leading-normal">
                                 <li>
                                     <a
-                                        href="https://cloud.laravel.com"
+                                        href="https://github.com/yassinebenh/isir#installation"
                                         target="_blank"
                                         className="inline-block rounded-sm border border-black bg-[#1b1b18] px-5 py-1.5 text-sm leading-normal text-white hover:border-black hover:bg-black dark:border-[#eeeeec] dark:bg-[#eeeeec] dark:text-[#1C1C1A] dark:hover:border-white dark:hover:bg-white"
                                     >
-                                        Deploy now
+                                        Self-host now
                                     </a>
                                 </li>
                             </ul>

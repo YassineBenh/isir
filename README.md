@@ -39,20 +39,20 @@ volumes:
 
 To enable AI-generated summaries for your digests, configure these environment variables:
 
-- `AI_DEFAULT_PROVIDER` — The default provider used by Laravel AI (defaults to `openai`).
+- `AI_DEFAULT_PROVIDER` — The default provider used by Isir AI summaries (defaults to `openai`).
 - `AI_MODEL` — Optional model override for digest summaries. If empty, the provider's built-in default model is used.
-- Provider API key env vars from Laravel AI (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`).
+- Provider API key env vars supported by Isir AI summaries (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`).
 - For local Ollama, set `AI_DEFAULT_PROVIDER=ollama` and optionally `OLLAMA_BASE_URL`.
 
 At least one valid provider key (or a reachable Ollama URL) must be configured for AI summaries to work. When not configured, the AI summary feature is disabled in the UI.
 
-For more details on configuring AI providers and models, see the [Laravel AI SDK documentation](https://laravel.com/docs/ai-sdk).
+For more details on configuring AI providers and models, see the [AI SDK documentation](https://laravel.com/docs/ai-sdk).
 
 ### Email Notifications
 
-To enable email delivery for your digests, configure the mail environment variables. ISIR uses Laravel's mail system, which supports multiple drivers including SMTP, Mailgun, Postmark, SES, and more.
+To enable email delivery for your digests, configure the mail environment variables. ISIR supports multiple mail drivers including SMTP, Mailgun, Postmark, SES, and more.
 
-For the full list of supported mail drivers and configuration options, see the [Laravel Mail documentation](https://laravel.com/docs/mail).
+For the full list of supported mail drivers and configuration options, see the [mail configuration documentation](https://laravel.com/docs/mail).
 
 The app will be available at `http://localhost:8080`.
 
