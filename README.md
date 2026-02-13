@@ -46,6 +46,8 @@ To enable AI-generated summaries for your digests, configure these environment v
 
 At least one valid provider key (or a reachable Ollama URL) must be configured for AI summaries to work. When not configured, the AI summary feature is disabled in the UI.
 
+For more details on configuring AI providers and models, see the [Laravel AI SDK documentation](https://laravel.com/docs/ai-sdk).
+
 ### Email Notifications
 
 To enable email delivery for your digests, configure the mail environment variables. ISIR uses Laravel's mail system, which supports multiple drivers including SMTP, Mailgun, Postmark, SES, and more.
