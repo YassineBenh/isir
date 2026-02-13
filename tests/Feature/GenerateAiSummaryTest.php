@@ -13,7 +13,7 @@ beforeEach(function () {
     // Configure AI for tests
     config(['ai.default' => 'anthropic']);
     config(['ai.providers.anthropic.key' => 'test-api-key']);
-    config(['ai.providers.anthropic.model' => 'claude-sonnet-4-20250514']);
+    config(['ai.model' => 'claude-sonnet-4-20250514']);
 
     $this->user = User::factory()->create();
     $this->digest = Digest::factory()->create([
@@ -110,7 +110,7 @@ describe('GenerateAiSummary', function () {
     it('uses configured AI provider and model', function () {
         config(['ai.default' => 'openai']);
         config(['ai.providers.openai.key' => 'test-openai-key']);
-        config(['ai.providers.openai.model' => 'gpt-4o']);
+        config(['ai.model' => 'gpt-4o']);
 
         $items = collect([
             SourceItem::factory()->create([

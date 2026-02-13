@@ -19,6 +19,7 @@ services:
             APP_URL: 'https://your-domain.com'
             # GITHUB_TOKEN: ''  # Optional: Increases rate limit (60 → 5000 req/hr)
             # AI_DEFAULT_PROVIDER: 'openai' # Optional: openai, anthropic, ollama, gemini, mistral, groq, deepseek, xai
+            # AI_MODEL: ''                  # Optional: override provider default model (e.g., gpt-5.2)
             # OPENAI_API_KEY: ''            # Optional: required for openai provider
             # ANTHROPIC_API_KEY: ''         # Optional: required for anthropic provider
             # OLLAMA_BASE_URL: 'http://host.docker.internal:11434' # Optional: for ollama provider
@@ -39,6 +40,7 @@ volumes:
 To enable AI-generated summaries for your digests, configure these environment variables:
 
 - `AI_DEFAULT_PROVIDER` — The default provider used by Laravel AI (defaults to `openai`).
+- `AI_MODEL` — Optional model override for digest summaries. If empty, the provider's built-in default model is used.
 - Provider API key env vars from Laravel AI (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`).
 - For local Ollama, set `AI_DEFAULT_PROVIDER=ollama` and optionally `OLLAMA_BASE_URL`.
 
@@ -64,6 +66,7 @@ docker run -d \
   -e APP_URL=https://your-domain.com \
   -e GITHUB_TOKEN=your_token_here \
   -e AI_DEFAULT_PROVIDER=openai \
+  -e AI_MODEL=gpt-5.2 \
   -e OPENAI_API_KEY=your_api_key_here \
   -v isir_data:/var/www/html/storage \
   ghcr.io/yassinebenh/isir:latest

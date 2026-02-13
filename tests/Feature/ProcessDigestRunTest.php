@@ -17,7 +17,7 @@ beforeEach(function () {
     // Configure AI for tests
     config(['ai.default' => 'anthropic']);
     config(['ai.providers.anthropic.key' => 'test-api-key']);
-    config(['ai.providers.anthropic.model' => 'claude-sonnet-4-20250514']);
+    config(['ai.model' => 'claude-sonnet-4-20250514']);
 
     $this->user = User::factory()->create();
     $this->digest = Digest::factory()->create([

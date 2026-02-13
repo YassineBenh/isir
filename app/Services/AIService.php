@@ -69,13 +69,7 @@ class AIService
      */
     public function getModel(): ?string
     {
-        $provider = $this->getProvider();
-
-        if ($provider === null) {
-            return null;
-        }
-
-        $model = config("ai.providers.{$provider}.model");
+        $model = config('ai.model');
 
         return is_string($model) && trim($model) !== '' ? $model : null;
     }
