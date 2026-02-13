@@ -4,6 +4,8 @@ use App\Actions\DeliverDigestRun;
 use App\Models\Destination;
 use App\Models\Digest;
 use App\Models\DigestRun;
+use App\Models\Source;
+use App\Models\SourceItem;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
@@ -14,10 +16,23 @@ beforeEach(function () {
         'digest_id' => $this->digest->id,
         'ai_summary' => 'Summary of release notes',
     ]);
+
+    $source = Source::factory()->create();
+    $sourceItems = SourceItem::factory()->count(2)->create([
+        'source_id' => $source->id,
+    ]);
+
+    $this->run->sourceItems()->attach(
+        $sourceItems
+            ->mapWithKeys(fn (SourceItem $item, int $index): array => [
+                $item->id => ['position' => $index + 1],
+            ])
+            ->all()
+    );
 });
 
 describe('delivery includes run URL', function () {
-    it('sends slack message with link only', function () {
+    it('sends slack message with item count and link', function () {
         Http::fake(['*' => Http::response('ok', 200)]);
 
         $destination = Destination::factory()->slack()->create(['user_id' => $this->user->id]);
@@ -29,13 +44,17 @@ describe('delivery includes run URL', function () {
         Http::assertSent(function ($request) {
             $text = $request->data()['text'] ?? '';
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
+            $expectedItemCount = $this->run->sourceItems()->count();
+            $expectedItemLabel = $expectedItemCount === 1 ? 'item' : 'items';
+            $expectedItemText = "This run includes {$expectedItemCount} {$expectedItemLabel}.";
 
             return str_contains($text, 'is now available')
+                && str_contains($text, $expectedItemText)
                 && str_contains($text, $expectedUrl);
         });
     });
 
-    it('sends discord message with link only', function () {
+    it('sends discord message with item count and link', function () {
         Http::fake(['*' => Http::response(['id' => '123'], 200)]);
 
         $destination = Destination::factory()->discord()->create(['user_id' => $this->user->id]);
@@ -47,8 +66,12 @@ describe('delivery includes run URL', function () {
         Http::assertSent(function ($request) {
             $content = $request->data()['content'] ?? '';
             $expectedUrl = route('digests.runs.show', [$this->digest, $this->run]);
+            $expectedItemCount = $this->run->sourceItems()->count();
+            $expectedItemLabel = $expectedItemCount === 1 ? 'item' : 'items';
+            $expectedItemText = "This run includes {$expectedItemCount} {$expectedItemLabel}.";
 
             return str_contains($content, 'is now available')
+                && str_contains($content, $expectedItemText)
                 && str_contains($content, $expectedUrl);
         });
     });

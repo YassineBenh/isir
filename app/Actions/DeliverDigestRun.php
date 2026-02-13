@@ -17,6 +17,8 @@ class DeliverDigestRun
      */
     public function __invoke(DigestRun $digestRun): void
     {
+        $digestRun->loadCount('sourceItems');
+
         $digest = $digestRun->digest;
         $destinations = $digest->destinations()->where('is_enabled', true)->get();
 
@@ -121,8 +123,7 @@ class DeliverDigestRun
         }
 
         $digest = $digestRun->digest;
-        $url = $this->getRunUrl($digestRun);
-        $content = "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
+        $content = $this->buildDeliveryMessage($digestRun);
 
         Mail::raw($content, function ($message) use ($email, $digest) {
             $message->to($email)
@@ -134,17 +135,21 @@ class DeliverDigestRun
 
     private function formatForSlack(DigestRun $digestRun): string
     {
-        $digest = $digestRun->digest;
-        $url = $this->getRunUrl($digestRun);
-
-        return "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
+        return $this->buildDeliveryMessage($digestRun);
     }
 
     private function formatForDiscord(DigestRun $digestRun): string
     {
+        return $this->buildDeliveryMessage($digestRun);
+    }
+
+    private function buildDeliveryMessage(DigestRun $digestRun): string
+    {
         $digest = $digestRun->digest;
         $url = $this->getRunUrl($digestRun);
+        $itemCount = $digestRun->source_items_count ?? $digestRun->sourceItems()->count();
+        $itemLabel = $itemCount === 1 ? 'item' : 'items';
 
-        return "Your digest \"{$digest->name}\" is now available.\n\nView it here: {$url}";
+        return "Your digest \"{$digest->name}\" is now available.\n\nThis run includes {$itemCount} {$itemLabel}.\n\nView it here: {$url}";
     }
 }
