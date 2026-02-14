@@ -114,6 +114,7 @@ export default function DigestRunShow({ digest, run }: Props) {
 
     const status = runStatusConfig[run.status];
     const StatusIcon = status.icon;
+    const hasAiSummary = Boolean(run.ai_summary?.trim());
 
     // Group source items by their source
     const itemsBySource = groupItemsBySource(run.source_items ?? []);
@@ -298,7 +299,11 @@ export default function DigestRunShow({ digest, run }: Props) {
                     </CardHeader>
                     <CardContent>
                         {digest.ai_enabled ? (
-                            <Tabs defaultValue="rendered">
+                            <Tabs
+                                defaultValue={
+                                    hasAiSummary ? 'rendered' : 'original'
+                                }
+                            >
                                 <TabsList>
                                     <TabsTrigger value="rendered">
                                         <Sparkles className="size-4" />
@@ -311,7 +316,7 @@ export default function DigestRunShow({ digest, run }: Props) {
                                 </TabsList>
 
                                 <TabsContent value="rendered" className="mt-4">
-                                    {run.ai_summary ? (
+                                    {hasAiSummary ? (
                                         <div className="prose prose-sm dark:prose-invert max-w-none">
                                             <Markdown>
                                                 {run.ai_summary}

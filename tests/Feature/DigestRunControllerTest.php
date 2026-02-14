@@ -48,6 +48,22 @@ describe('show', function () {
         );
     });
 
+    it('includes empty ai_summary when no summary is available', function () {
+        $digest = Digest::factory()->create(['user_id' => $this->user->id]);
+        $run = DigestRun::factory()->completed()->create([
+            'digest_id' => $digest->id,
+            'ai_summary' => null,
+        ]);
+
+        $response = $this->actingAs($this->user)->get("/digests/{$digest->id}/runs/{$run->id}");
+
+        $response->assertSuccessful();
+        $response->assertInertia(fn ($page) => $page
+            ->where('run.id', $run->id)
+            ->where('run.ai_summary', null)
+        );
+    });
+
     it('prevents viewing run from another users digest', function () {
         $otherUser = User::factory()->create();
         $otherDigest = Digest::factory()->create(['user_id' => $otherUser->id]);
