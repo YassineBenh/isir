@@ -44,6 +44,7 @@ interface FormData {
     send_day_of_week: number | null;
     is_enabled: boolean;
     ai_enabled: boolean;
+    include_versions_summary: boolean;
     source_urls: string[];
     slack_destination_id: number | '';
     discord_destination_id: number | '';
@@ -91,6 +92,7 @@ export function DigestForm({
             send_day_of_week: digest?.send_day_of_week ?? 1,
             is_enabled: digest?.is_enabled ?? true,
             ai_enabled: digest?.ai_enabled ?? true,
+            include_versions_summary: digest?.include_versions_summary ?? false,
             source_urls: digest?.sources?.map((s) => s.name) ?? [],
             slack_destination_id: getDestinationIdForType(digest, 'slack'),
             discord_destination_id: getDestinationIdForType(digest, 'discord'),
@@ -387,6 +389,39 @@ export function DigestForm({
                         </a>
                     </p>
                 )}
+            </div>
+
+            <Separator />
+
+            {/* Notification Content */}
+            <div className="space-y-4">
+                <h3 className="text-sm font-medium">Notification Content</h3>
+                <div className="flex items-start space-x-2">
+                    <Checkbox
+                        id="include_versions_summary"
+                        checked={data.include_versions_summary}
+                        onCheckedChange={(checked) =>
+                            setData(
+                                'include_versions_summary',
+                                checked === true,
+                            )
+                        }
+                    />
+                    <div className="grid gap-1.5 leading-none">
+                        <Label
+                            htmlFor="include_versions_summary"
+                            className="text-sm leading-none font-normal"
+                        >
+                            Include a summary of versions released in the
+                            notification
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                            When enabled, notifications include a bullet list of
+                            release titles from this digest run.
+                        </p>
+                        <InputError message={errors.include_versions_summary} />
+                    </div>
+                </div>
             </div>
 
             {/* Submit */}

@@ -17,9 +17,18 @@ beforeEach(function () {
         'ai_summary' => 'Summary of release notes',
     ]);
 
-    $source = Source::factory()->create();
-    $sourceItems = SourceItem::factory()->count(2)->create([
-        'source_id' => $source->id,
+    $sourceOne = Source::factory()->create(['name' => 'laravel/framework']);
+    $sourceTwo = Source::factory()->create(['name' => 'laravel/laravel']);
+
+    $sourceItems = collect([
+        SourceItem::factory()->create([
+            'source_id' => $sourceOne->id,
+            'title' => 'v1.0.0',
+        ]),
+        SourceItem::factory()->create([
+            'source_id' => $sourceTwo->id,
+            'title' => 'v1.1.0',
+        ]),
     ]);
 
     $this->run->sourceItems()->attach(
@@ -50,7 +59,8 @@ describe('delivery includes run URL', function () {
 
             return str_contains($text, 'is now available')
                 && str_contains($text, $expectedItemText)
-                && str_contains($text, $expectedUrl);
+                && str_contains($text, $expectedUrl)
+                && ! str_contains($text, 'Versions released in this run:');
         });
     });
 
@@ -72,7 +82,28 @@ describe('delivery includes run URL', function () {
 
             return str_contains($content, 'is now available')
                 && str_contains($content, $expectedItemText)
-                && str_contains($content, $expectedUrl);
+                && str_contains($content, $expectedUrl)
+                && ! str_contains($content, 'Versions released in this run:');
+        });
+    });
+
+    it('includes version titles in notification when enabled', function () {
+        Http::fake(['*' => Http::response('ok', 200)]);
+
+        $this->digest->update(['include_versions_summary' => true]);
+
+        $destination = Destination::factory()->slack()->create(['user_id' => $this->user->id]);
+        $this->digest->destinations()->attach($destination);
+
+        $action = app(DeliverDigestRun::class);
+        $action($this->run);
+
+        Http::assertSent(function ($request) {
+            $text = $request->data()['text'] ?? '';
+
+            return str_contains($text, 'Versions released in this run:')
+                && str_contains($text, '- laravel/framework: v1.0.0')
+                && str_contains($text, '- laravel/laravel: v1.1.0');
         });
     });
 

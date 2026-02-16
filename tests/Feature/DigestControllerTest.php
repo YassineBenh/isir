@@ -172,6 +172,7 @@ describe('store', function () {
             'send_time' => '09:00',
             'source_urls' => ['laravel/framework', 'github.com/laravel/laravel'],
             'ai_enabled' => true,
+            'include_versions_summary' => true,
         ]);
 
         $response->assertRedirect('/digests');
@@ -181,6 +182,7 @@ describe('store', function () {
             'name' => 'My Digest',
             'frequency' => 'daily',
             'timezone' => 'UTC',
+            'include_versions_summary' => true,
         ]);
 
         $digest = Digest::first();
@@ -491,6 +493,7 @@ describe('update', function () {
             'timezone' => 'America/Los_Angeles',
             'send_time' => '14:00',
             'send_day_of_week' => 5,
+            'include_versions_summary' => true,
             'source_urls' => ['new-owner/new-repo'],
         ]);
 
@@ -500,6 +503,7 @@ describe('update', function () {
         expect($digest->name)->toBe('Updated Name');
         expect($digest->frequency)->toBe('weekly');
         expect($digest->send_day_of_week)->toBe(5);
+        expect($digest->include_versions_summary)->toBeTrue();
         expect($digest->sources->first()->name)->toBe('new-owner/new-repo');
     });
 

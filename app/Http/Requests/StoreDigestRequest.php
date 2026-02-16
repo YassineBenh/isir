@@ -53,6 +53,7 @@ class StoreDigestRequest extends FormRequest
             ],
             'is_enabled' => ['boolean'],
             'ai_enabled' => ['boolean'],
+            'include_versions_summary' => ['boolean'],
             'source_urls' => [
                 'required',
                 'array',
@@ -117,6 +118,7 @@ class StoreDigestRequest extends FormRequest
             'source_urls.*' => 'repository URL',
             'send_time' => 'send time',
             'send_day_of_week' => 'day of week',
+            'include_versions_summary' => 'version summary in notification',
             'slack_destination_id' => 'Slack destination',
             'discord_destination_id' => 'Discord destination',
             'email_destination_id' => 'email destination',

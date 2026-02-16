@@ -21,6 +21,7 @@ class UpdateDigest
      *     send_day_of_week?: int|null,
      *     is_enabled?: bool,
      *     ai_enabled?: bool,
+     *     include_versions_summary?: bool,
      *     source_urls: array<string>,
      *     slack_destination_id?: int|null,
      *     discord_destination_id?: int|null,
@@ -37,6 +38,7 @@ class UpdateDigest
             'send_day_of_week' => $data['send_day_of_week'] ?? null,
             'is_enabled' => $data['is_enabled'] ?? $digest->is_enabled,
             'ai_enabled' => $data['ai_enabled'] ?? $digest->ai_enabled,
+            'include_versions_summary' => $data['include_versions_summary'] ?? $digest->include_versions_summary,
         ]);
 
         // Sync sources

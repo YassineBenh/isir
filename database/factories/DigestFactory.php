@@ -28,6 +28,7 @@ class DigestFactory extends Factory
             'last_successful_run_at' => null,
             'last_dispatched_at' => null,
             'ai_enabled' => true,
+            'include_versions_summary' => false,
             'ai_prefs' => null,
         ];
     }

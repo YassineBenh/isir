@@ -24,6 +24,7 @@ class Digest extends Model
         'last_successful_run_at',
         'last_dispatched_at',
         'ai_enabled',
+        'include_versions_summary',
         'ai_prefs',
     ];
 
@@ -35,6 +36,7 @@ class Digest extends Model
         return [
             'is_enabled' => 'boolean',
             'ai_enabled' => 'boolean',
+            'include_versions_summary' => 'boolean',
             'ai_prefs' => 'array',
             'last_successful_run_at' => 'datetime',
             'last_dispatched_at' => 'datetime',

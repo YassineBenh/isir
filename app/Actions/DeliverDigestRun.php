@@ -18,6 +18,16 @@ class DeliverDigestRun
     public function __invoke(DigestRun $digestRun): void
     {
         $digestRun->loadCount('sourceItems');
+        $digestRun->load('digest');
+
+        if ($digestRun->digest->include_versions_summary) {
+            $digestRun->load([
+                'sourceItems' => fn ($query) => $query
+                    ->select('source_items.id', 'source_items.source_id', 'source_items.title')
+                    ->with('source:id,name')
+                    ->orderBy('digest_run_source_item.position'),
+            ]);
+        }
 
         $digest = $digestRun->digest;
         $destinations = $digest->destinations()->where('is_enabled', true)->get();
@@ -149,7 +159,58 @@ class DeliverDigestRun
         $url = $this->getRunUrl($digestRun);
         $itemCount = $digestRun->source_items_count ?? $digestRun->sourceItems()->count();
         $itemLabel = $itemCount === 1 ? 'item' : 'items';
+        $lines = [
+            "Your digest \"{$digest->name}\" is now available.",
+            '',
+            "This run includes {$itemCount} {$itemLabel}.",
+        ];
 
-        return "Your digest \"{$digest->name}\" is now available.\n\nThis run includes {$itemCount} {$itemLabel}.\n\nView it here: {$url}";
+        if ($digest->include_versions_summary) {
+            $summaryLines = $this->getVersionSummaryLines($digestRun);
+
+            if (! empty($summaryLines)) {
+                $lines[] = '';
+                $lines[] = 'Versions released in this run:';
+
+                foreach ($summaryLines as $summaryLine) {
+                    $lines[] = "- {$summaryLine}";
+                }
+            }
+        }
+
+        $lines[] = '';
+        $lines[] = "View it here: {$url}";
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getVersionSummaryLines(DigestRun $digestRun): array
+    {
+        if (! $digestRun->relationLoaded('sourceItems')) {
+            return [];
+        }
+
+        return $digestRun->sourceItems
+            ->map(function ($item): ?string {
+                $title = trim((string) $item->title);
+
+                if ($title === '') {
+                    return null;
+                }
+
+                $sourceName = trim((string) ($item->source?->name ?? ''));
+
+                if ($sourceName === '') {
+                    return "Unknown source: {$title}";
+                }
+
+                return "{$sourceName}: {$title}";
+            })
+            ->filter(fn (?string $line): bool => filled($line))
+            ->values()
+            ->all();
     }
 }

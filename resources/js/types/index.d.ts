@@ -90,6 +90,7 @@ export interface Digest {
     send_day_of_week: number | null;
     is_enabled: boolean;
     ai_enabled: boolean;
+    include_versions_summary: boolean;
     ai_prefs: Record<string, unknown> | null;
     last_successful_run_at: string | null;
     created_at: string;
