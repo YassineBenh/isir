@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { FileText, Plus } from 'lucide-react';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { DigestCard } from '@/components/digest-card';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,6 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Digest } from '@/types';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -2,6 +2,7 @@ import { useForm, usePage } from '@inertiajs/react';
 import { AxiosError } from 'axios';
 import { type FormEvent, useState } from 'react';
 
+import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,6 @@ import {
     type SharedData,
 } from '@/types';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 
 interface DestinationFormProps {
     destination?: Destination;

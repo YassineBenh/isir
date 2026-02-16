@@ -11,6 +11,7 @@ import {
     Trash2,
 } from 'lucide-react';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +37,6 @@ import {
 } from '@/components/ui/tooltip';
 import { type Destination, type DestinationType, type Digest } from '@/types';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 

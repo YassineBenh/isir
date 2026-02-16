@@ -14,6 +14,8 @@ import {
     Zap,
 } from 'lucide-react';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
+import DigestRunController from '@/actions/App/Http/Controllers/DigestRunController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,11 +41,9 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DigestRunStatus } from '@/types';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
-import DigestRunController from '@/actions/App/Http/Controllers/DigestRunController';
-import { dashboard } from '@/routes';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
