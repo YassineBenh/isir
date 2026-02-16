@@ -1,12 +1,12 @@
 import { Head, router } from '@inertiajs/react';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { DigestForm } from '@/components/digest-form';
 import Heading from '@/components/heading';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type DestinationsByType } from '@/types';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

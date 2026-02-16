@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useActiveUrl } from '@/hooks/use-active-url';
 import { cn, toUrl } from '@/lib/utils';
+import { type NavItem, type SharedData } from '@/types';
+
 import { edit as editAdmin } from '@/routes/admin';
 import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
-import { type NavItem, type SharedData } from '@/types';
 
 const baseSidebarNavItems: NavItem[] = [
     {

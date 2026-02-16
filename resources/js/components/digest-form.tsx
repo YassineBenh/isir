@@ -2,7 +2,6 @@ import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useState } from 'react';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { DestinationModal } from '@/components/destination-modal';
 import InputError from '@/components/input-error';
 import { RepoChip } from '@/components/repo-chip';
@@ -26,6 +25,7 @@ import {
     type DigestFrequency,
 } from '@/types';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 interface DigestFormProps {
     digest?: Digest;

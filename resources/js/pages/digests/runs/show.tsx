@@ -17,7 +17,6 @@ import {
 import { useState } from 'react';
 import Markdown from 'react-markdown';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -61,6 +60,7 @@ import {
     type SourceItem,
 } from '@/types';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
 
 const destinationIcons: Record<DestinationType, typeof Slack> = {
     slack: Slack,

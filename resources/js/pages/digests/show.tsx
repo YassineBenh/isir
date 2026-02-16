@@ -14,8 +14,6 @@ import {
     Slack,
 } from 'lucide-react';
 
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
-import DigestRunController from '@/actions/App/Http/Controllers/DigestRunController';
 import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -52,6 +50,8 @@ import {
     type PaginatedData,
 } from '@/types';
 
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
+import DigestRunController from '@/actions/App/Http/Controllers/DigestRunController';
 
 const DAYS_OF_WEEK = [
     'Sunday',

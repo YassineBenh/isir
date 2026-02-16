@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { Mail, Plus } from 'lucide-react';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import { DestinationCard } from '@/components/destination-card';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Destination } from '@/types';
 
+import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

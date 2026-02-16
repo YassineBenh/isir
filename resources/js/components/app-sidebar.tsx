@@ -1,8 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { FileText, Folder, LayoutGrid, Send } from 'lucide-react';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
-import DigestController from '@/actions/App/Http/Controllers/DigestController';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -15,11 +13,13 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 
 import AppLogo from './app-logo';
 
+import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
+import DigestController from '@/actions/App/Http/Controllers/DigestController';
+import { dashboard } from '@/routes';
 
 const mainNavItems: NavItem[] = [
     {

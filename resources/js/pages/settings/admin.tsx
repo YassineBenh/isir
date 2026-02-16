@@ -2,16 +2,16 @@ import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
 import { type FormEvent } from 'react';
 
-import AdminSettingsController from '@/actions/App/Http/Controllers/Settings/AdminSettingsController';
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit } from '@/routes/admin';
 import { type BreadcrumbItem } from '@/types';
 
+import AdminSettingsController from '@/actions/App/Http/Controllers/Settings/AdminSettingsController';
+import { edit } from '@/routes/admin';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

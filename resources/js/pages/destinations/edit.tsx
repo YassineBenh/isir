@@ -1,12 +1,12 @@
 import { Head, router } from '@inertiajs/react';
 
-import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 import { DestinationForm } from '@/components/destination-form';
 import Heading from '@/components/heading';
 import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Destination } from '@/types';
 
+import DestinationController from '@/actions/App/Http/Controllers/DestinationController';
 
 interface Props {
     destination: Destination;
