@@ -4,8 +4,7 @@ use App\Settings\AdminSettings;
 
 test('registration screen can be rendered', function () {
     $settings = app(AdminSettings::class);
-    $settings->registration_enabled = true;
-    $settings->save();
+    expect($settings->registration_enabled)->toBeFalse();
 
     $response = $this->get(route('register'));
 

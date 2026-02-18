@@ -57,6 +57,8 @@ test('non-admin cannot update admin settings', function () {
 });
 
 test('registration page redirects to login when registration is disabled', function () {
+    User::factory()->create();
+
     $settings = app(AdminSettings::class);
     $settings->registration_enabled = false;
     $settings->save();
@@ -68,6 +70,8 @@ test('registration page redirects to login when registration is disabled', funct
 });
 
 test('registration page is accessible when registration is enabled', function () {
+    User::factory()->create();
+
     $settings = app(AdminSettings::class);
     $settings->registration_enabled = true;
     $settings->save();
@@ -78,6 +82,8 @@ test('registration page is accessible when registration is enabled', function ()
 });
 
 test('login page shows registration link when enabled', function () {
+    User::factory()->create();
+
     $settings = app(AdminSettings::class);
     $settings->registration_enabled = true;
     $settings->save();
@@ -91,6 +97,8 @@ test('login page shows registration link when enabled', function () {
 });
 
 test('login page hides registration link when disabled', function () {
+    User::factory()->create();
+
     $settings = app(AdminSettings::class);
     $settings->registration_enabled = false;
     $settings->save();
@@ -100,6 +108,29 @@ test('login page hides registration link when disabled', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->where('canRegister', false)
+    );
+});
+
+test('registration page is accessible for first user when registration is disabled', function () {
+    $settings = app(AdminSettings::class);
+    $settings->registration_enabled = false;
+    $settings->save();
+
+    $response = $this->get(route('register'));
+
+    $response->assertOk();
+});
+
+test('login page shows registration link for first user when registration is disabled', function () {
+    $settings = app(AdminSettings::class);
+    $settings->registration_enabled = false;
+    $settings->save();
+
+    $response = $this->get(route('login'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->where('canRegister', true)
     );
 });
 

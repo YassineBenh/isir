@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Models\User;
 use App\Settings\AdminSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -103,6 +104,10 @@ class FortifyServiceProvider extends ServiceProvider
     {
         if (! Features::enabled(Features::registration())) {
             return false;
+        }
+
+        if (User::count() === 0) {
+            return true;
         }
 
         return app(AdminSettings::class)->registration_enabled;
