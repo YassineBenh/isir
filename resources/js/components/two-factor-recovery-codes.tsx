@@ -15,7 +15,6 @@ import AlertError from './alert-error';
 
 import { regenerateRecoveryCodes } from '@/routes/two-factor';
 
-
 interface TwoFactorRecoveryCodesProps {
     recoveryCodesList: string[];
     fetchRecoveryCodes: () => Promise<void>;
