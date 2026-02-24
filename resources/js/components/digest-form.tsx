@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useState } from 'react';
 
@@ -23,6 +23,7 @@ import {
     type DestinationsByType,
     type Digest,
     type DigestFrequency,
+    type SharedData,
 } from '@/types';
 
 import DigestController from '@/actions/App/Http/Controllers/DigestController';
@@ -79,6 +80,7 @@ export function DigestForm({
     aiConfigured = false,
     onCancel,
 }: DigestFormProps) {
+    const { auth } = usePage<SharedData>().props;
     const isEditing = !!digest;
     const [repoInput, setRepoInput] = useState('');
     const [repoError, setRepoError] = useState<string | null>(null);
@@ -87,7 +89,7 @@ export function DigestForm({
         useForm<FormData>({
             name: digest?.name ?? '',
             frequency: digest?.frequency ?? 'daily',
-            timezone: digest?.timezone ?? 'UTC',
+            timezone: digest?.timezone ?? auth.user.timezone ?? 'UTC',
             send_time: digest?.send_time?.slice(0, 5) ?? '09:00',
             send_day_of_week: digest?.send_day_of_week ?? 1,
             is_enabled: digest?.is_enabled ?? true,

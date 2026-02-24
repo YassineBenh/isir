@@ -9,6 +9,7 @@ test('first registered user gets admin role', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'First User',
         'email' => 'first@example.com',
+        'timezone' => 'UTC',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
@@ -34,6 +35,7 @@ test('subsequent registered users get user role', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Second User',
         'email' => 'second@example.com',
+        'timezone' => 'Europe/Paris',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
@@ -44,4 +46,5 @@ test('subsequent registered users get user role', function () {
     $user = User::where('email', 'second@example.com')->first();
     expect($user->hasRole('user'))->toBeTrue();
     expect($user->hasRole('admin'))->toBeFalse();
+    expect($user->timezone)->toBe('Europe/Paris');
 });

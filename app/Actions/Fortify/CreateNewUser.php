@@ -34,6 +34,7 @@ class CreateNewUser implements CreatesNewUsers
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
+            'timezone' => $input['timezone'] ?? 'UTC',
             'password' => $input['password'],
         ]);
 

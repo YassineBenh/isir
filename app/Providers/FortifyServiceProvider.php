@@ -73,7 +73,9 @@ class FortifyServiceProvider extends ServiceProvider
                 return redirect()->route('login')->with('status', 'Registration is currently disabled.');
             }
 
-            return Inertia::render('auth/register');
+            return Inertia::render('auth/register', [
+                'timezones' => config('isir.timezones'),
+            ]);
         });
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));

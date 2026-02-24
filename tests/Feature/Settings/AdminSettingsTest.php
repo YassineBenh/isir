@@ -146,6 +146,7 @@ test('users cannot register when registration is disabled', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
+        'timezone' => 'UTC',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
