@@ -1,61 +1,68 @@
 ############################################
-# Base Image
+# Runtime Base Image
 ############################################
 
-FROM serversideup/php:8.5-fpm-nginx AS base
-
-USER root
-
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o /tmp/nodesource_setup.sh && \
-    bash /tmp/nodesource_setup.sh && \
-    apt-get install -y nodejs=22.* && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-USER www-data
+FROM serversideup/php:8.5-fpm-nginx-alpine AS runtime
 
 ############################################
-# Build Stage with Dependency Caching
+# PHP Dependencies Build Stage
 ############################################
-FROM base AS build
+FROM runtime AS php-build
 
 WORKDIR /var/www/html
 
 # Install PHP dependencies first (cached layer)
-COPY composer.json composer.lock ./
+COPY --chown=www-data:www-data composer.json composer.lock ./
 RUN composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
-# Install Node dependencies including dev deps for Vite (cached layer)
-COPY package.json package-lock.json ./
+# Copy source code
+COPY --chown=www-data:www-data . .
+
+############################################
+# Frontend Build Stage
+############################################
+FROM php-build AS frontend-build
+
+USER root
+
+RUN apk add --no-cache nodejs npm && \
+    mkdir -p /var/www/html/storage/logs && \
+    chown -R www-data:www-data /var/www/html/storage
+
+USER www-data
+
+WORKDIR /var/www/html
+
+# Install Node dependencies first (cached layer)
+COPY --chown=www-data:www-data package.json package-lock.json ./
 RUN npm ci
 
-# Copy source code and build (only runs when code changes)
-COPY --chown=www-data:www-data . .
 RUN npm run build
 
 ############################################
 # Production Deploy Image
 ############################################
-FROM base AS deploy
+FROM runtime AS deploy
 
 ENV PHP_OPCACHE_ENABLE="1"
 ENV AUTORUN_ENABLED="true"
 
 WORKDIR /var/www/html
 
-COPY --from=build --chown=www-data:www-data /var/www/html/vendor ./vendor
-COPY --from=build --chown=www-data:www-data /var/www/html/public ./public
-COPY --from=build --chown=www-data:www-data /var/www/html/bootstrap ./bootstrap
-COPY --from=build --chown=www-data:www-data /var/www/html/app ./app
-COPY --from=build --chown=www-data:www-data /var/www/html/config ./config
-COPY --from=build --chown=www-data:www-data /var/www/html/database ./database
-COPY --from=build --chown=www-data:www-data /var/www/html/resources ./resources
-COPY --from=build --chown=www-data:www-data /var/www/html/routes ./routes
-COPY --from=build --chown=www-data:www-data /var/www/html/storage ./storage
-COPY --from=build --chown=www-data:www-data /var/www/html/artisan ./artisan
-COPY --from=build --chown=www-data:www-data /var/www/html/composer.json ./composer.json
-COPY --from=build --chown=www-data:www-data /var/www/html/composer.lock ./composer.lock
-COPY --from=build --chown=www-data:www-data /var/www/html/.env.example.production ./.env.example.production
+COPY --from=php-build --chown=www-data:www-data /var/www/html/vendor ./vendor
+COPY --from=php-build --chown=www-data:www-data /var/www/html/public ./public
+COPY --from=php-build --chown=www-data:www-data /var/www/html/bootstrap ./bootstrap
+COPY --from=php-build --chown=www-data:www-data /var/www/html/app ./app
+COPY --from=php-build --chown=www-data:www-data /var/www/html/config ./config
+COPY --from=php-build --chown=www-data:www-data /var/www/html/database ./database
+COPY --from=php-build --chown=www-data:www-data /var/www/html/resources ./resources
+COPY --from=php-build --chown=www-data:www-data /var/www/html/routes ./routes
+COPY --from=php-build --chown=www-data:www-data /var/www/html/storage ./storage
+COPY --from=php-build --chown=www-data:www-data /var/www/html/artisan ./artisan
+COPY --from=php-build --chown=www-data:www-data /var/www/html/composer.json ./composer.json
+COPY --from=php-build --chown=www-data:www-data /var/www/html/composer.lock ./composer.lock
+COPY --from=php-build --chown=www-data:www-data /var/www/html/.env.example.production ./.env.example.production
+COPY --from=frontend-build --chown=www-data:www-data /var/www/html/public/build ./public/build
 
 COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/
 COPY --chmod=755 ./docker/s6-rc.d/ /etc/s6-overlay/s6-rc.d/

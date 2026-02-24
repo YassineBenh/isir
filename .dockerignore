@@ -1,1 +1,5 @@
+.git
+.github
+node_modules
+vendor
 database/data/
