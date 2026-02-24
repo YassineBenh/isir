@@ -1,4 +1,4 @@
 #!/bin/sh
 set -e
 
-exec php /var/www/html/artisan schedule:work --no-interaction
+exec php /var/www/html/artisan schedule:work --no-interaction --whisper
